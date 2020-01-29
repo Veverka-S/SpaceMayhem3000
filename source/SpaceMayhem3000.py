@@ -18,6 +18,9 @@ playy = 65
 #pozice tlacitka credits
 creditsx = 500
 creditsy = 330
+#herni pozadi
+gamex = 0
+gamey = -850
 #pozice tlacitka quit
 quitx = 500
 quity = 595
@@ -44,9 +47,16 @@ end = pygame.image.load('quit.jpg')
 plays = pygame.image.load('plays.jpg')
 creditss = pygame.image.load('creditss.jpg')
 quits = pygame.image.load('quits.jpg')
+game = pygame.image.load('game.jpg')
 
-
+def exitbutton():
+    for event in pygame.event.get() :
+        if event.type == pygame.QUIT :
+            pygame.quit()
+            quit()
+#Když se level rovná 0, tak se otevře menu
 while level == 0:
+    exitbutton()
     pohled.fill(white)
     pohled.blit(bkg, (0,0))
     pohled.blit(play, (selectionx,selectiony))
@@ -57,22 +67,22 @@ while level == 0:
     
     if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
         pohled.blit(plays,(playx,playy))
+        if pygame.mouse.get_pressed()[0]:
+            # level se nastaví na 1, což je hra
+            level = 1
     elif cursor[0] > 500 and cursor [0] < 1150 and cursor[1]  > 330 and cursor[1] < 550:
         pohled.blit(creditss,(creditsx,creditsy))
         if pygame.mouse.get_pressed()[0]:
+            #bud se dodělávat později, potřebuji zjistit jak vyčíst ze souboru.
+            pass
     elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
         pohled.blit(quits,(quitx,quity))
         if pygame.mouse.get_pressed()[0]:
-            pygame.quit()
-            quit()
-    
-    for event in pygame.event.get() :
-        if event.type == pygame.QUIT :
-            pygame.quit()
-            quit()
-            
-    stisknuto = pygame.key.get_pressed()
-
+            exit()
+    #když hru spustím v tomto stavu, tak funguje menu a dá se klikat
+    #ale když přidám while level == 1:, tak se vytvoří blackscreen, někdy se dokonce objeví i menší pruh na okraji obrazovky
+while level == 1:
+    pohled.blit(bkg, (0,0))
 
     pygame.display.update()
 quit()
