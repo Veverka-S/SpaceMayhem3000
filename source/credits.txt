@@ -1,0 +1,6 @@
+Space Mayhem 3000
+Author : Marek Veverka
+Graphics : Marek Veverka
+Engine : Marek Veverka
+Special thanks to my beta-testers: Ondrej Mihalik
+:)
