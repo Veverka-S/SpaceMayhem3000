@@ -81,7 +81,11 @@ while level == 0:
             exit()
     #když hru spustím v tomto stavu, tak funguje menu a dá se klikat
     #ale když přidám while level == 1:, tak se vytvoří blackscreen, někdy se dokonce objeví i menší pruh na okraji obrazovky
+
+    pygame.display.update()
 while level == 1:
+    exitbutton()
+    pohled.fill(white)
     pohled.blit(bkg, (0,0))
 
     pygame.display.update()
