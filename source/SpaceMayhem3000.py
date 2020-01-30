@@ -48,6 +48,7 @@ plays = pygame.image.load('plays.jpg')
 creditss = pygame.image.load('creditss.jpg')
 quits = pygame.image.load('quits.jpg')
 game = pygame.image.load('game.jpg')
+shot = pygame.image.load('shot.png').convert_alpha()
 
 def exitbutton():
     for event in pygame.event.get() :
@@ -79,10 +80,14 @@ while level == 0:
         pohled.blit(quits,(quitx,quity))
         if pygame.mouse.get_pressed()[0]:
             exit()
-    #když hru spustím v tomto stavu, tak funguje menu a dá se klikat
-    #ale když přidám while level == 1:, tak se vytvoří blackscreen, někdy se dokonce objeví i menší pruh na okraji obrazovky
-while level == 1:
-    pohled.blit(bkg, (0,0))
-
     pygame.display.update()
-quit()
+while level == 1:
+    exitbutton()
+    pohled.fill(white)
+    pohled.blit(game, (0,0))
+    pohled.blit(shot, (300,600))
+    
+    
+    
+    
+    pygame.display.update()
