@@ -1,12 +1,20 @@
 import pygame
 import time
+import random
 
 pygame.init()
 
 white = (255, 255, 255)
+#Informace lode
+vv = 5 #vertical_velocity
+hv = 7 #horizontal_velocity
+sshipx = 800 #pozice x
+sshipy = 750 #pozice y
+sshipw=50 #sirka
+sshiph=50 #vyska
 #obrazovka
-X = 1650
-Y = 850
+resolution_x = 1650
+resolution_y = 850
 #dimenze tlacitek
 selectionx = 500
 selectiony = 65
@@ -18,9 +26,6 @@ playy = 65
 #pozice tlacitka credits
 creditsx = 500
 creditsy = 330
-#herni pozadi
-gamex = 0
-gamey = -850
 #pozice tlacitka quit
 quitx = 500
 quity = 595
@@ -33,10 +38,12 @@ level = 0
 rocket = False
 #pocet zivotu
 health = 3
-#vybrane tlacitko v menu
-selected = 1
+#enemy
+max_enemy = 8
+max_velikost_enemy = 50
+max_sirka_enemy = 50
 
-pohled = pygame.display.set_mode((X,Y))
+pohled = pygame.display.set_mode((resolution_x,resolution_y))
 
 #GRAFIKA
 pygame.display.set_caption("Markovo Space Mayhem")
@@ -49,12 +56,50 @@ creditss = pygame.image.load('creditss.jpg')
 quits = pygame.image.load('quits.jpg')
 game = pygame.image.load('game.jpg')
 shot = pygame.image.load('shot.png').convert_alpha()
+sship = pygame.image.load('sship.png').convert_alpha()
+pygame.transform.scale(sship,(25,25))
 
+#Programy
 def exitbutton():
     for event in pygame.event.get() :
         if event.type == pygame.QUIT :
             pygame.quit()
             quit()
+
+def ovladani_lodi():
+    global sshipy
+    global sshipx
+    if key[pygame.K_w]:
+        sshipy -= vv
+        if sshipy < 0:
+            sshipy = 0
+    if key[pygame.K_s]:
+        sshipy += vv
+        if sshipy > resolution_y - sshiph:
+            sshipy = resolution_y - sshiph
+    if key[pygame.K_a]:
+        sshipx -= hv
+        if sshipx < 0:
+            sshipx = 0
+    if key[pygame.K_d]:
+        sshipx += hv
+        if sshipx > resolution_x - sshipw:
+            sshipx = resolution_x - sshipw
+
+enemies = []
+for i in range(max_enemy):
+    enemy = dict()
+    
+    enemy['w'] = 50
+    enemy['h'] = enemy['w']
+    
+    enemy['x'] = random.randint(0, resolution_x - enemy['w'])
+    enemy['y'] = random.randint(0, resolution_y - enemy['h'] - 150)
+    enemy['rgb'] = (random.randint(0, 254), random.randint(0, 254), random.randint(0, 254))
+    
+    enemies.append(enemy)
+                                
+            
 #Když se level rovná 0, tak se otevře menu
 while level == 0:
     exitbutton()
@@ -64,7 +109,6 @@ while level == 0:
     pohled.blit(credit, (selectionx, selectiony*2 + selectionh))
     pohled.blit(end, (selectionx, selectiony*3 + selectionh*2))
     cursor = pygame.mouse.get_pos()
-    mpress = pygame.key.get_pressed()
     
     if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
         pohled.blit(plays,(playx,playy))
@@ -85,7 +129,15 @@ while level == 1:
     exitbutton()
     pohled.fill(white)
     pohled.blit(game, (0,0))
-    pohled.blit(shot, (300,600))
+    pohled.blit(sship, (sshipx,sshipy))
+    key = pygame.key.get_pressed()
+    ovladani_lodi()
+    for enemy in enemies:
+        pygame.draw.ellipse(pohled, enemy['rgb'], (enemy['x'], enemy['y'], enemy['w'], enemy['h']))
+            
+
+            
+    
     
     
     
