@@ -6,6 +6,7 @@ import sys
 #Programy
 playerx = 825
 playery = 725
+shotv = 15
 vv = 5
 hv = 7
 def mov():
@@ -32,7 +33,12 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('sship.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.center = pos
-
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('shot.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
     
 def exitbutton():
     for event in pygame.event.get() :
@@ -44,7 +50,6 @@ def exitbutton():
 
 #Když se level rovná 0, tak se otevře menu
 def main():
-    
     pygame.init()
     resolution_x = 1650 
     resolution_y = 850 
@@ -60,6 +65,7 @@ def main():
     quits = pygame.image.load('quits.jpg')
     game = pygame.image.load('game.jpg')
     sship = pygame.image.load('sship.png').convert_alpha()
+    game_over = pygame.image.load('game_over.png').convert_alpha()
     
     white = (255, 255, 255)
     
@@ -79,6 +85,7 @@ def main():
     #POSOTIONS
     enemyx = random.randint(0,1630)
     enemyy = random.randint(0,700)
+    move = True
     
 
     while level == 0:
@@ -106,24 +113,35 @@ def main():
                 exit()
         pygame.display.update()
     while level == 1:
+        shotx = playerx
+        shoty = playery
         exitbutton()
-        pohled.fill(white)
-        pohled.blit(game, (0,0))
-        key = pygame.key.get_pressed()
-        enemy = Enemy([enemyx, enemyy])
+        pohled.blit(game,(0,0))
+        
+        enemy = Enemy([enemyx,enemyy])
         enemy_group = pygame.sprite.Group()
         enemy_group.add(enemy)
+        
         player = Player([playerx, playery])
         player_group = pygame.sprite.Group()
         player_group.add(player)
-        player_group.draw(pohled)
-        enemy_group.draw(pohled)
-        mov()
-        collision_with_enemy = pygame.sprite.spritecollide(player, enemy_group, True)
-        if collision_with_enemy:
-            pohled.fill(white)
-
         
+        shot = Bullet([shotx , shoty])
+        shot_group = pygame.sprite.Group()
+        shot_group.add(shot)
+        
+        
+        enemy_group.draw(pohled)
+        shot_group.draw(pohled)
+        player_group.draw(pohled)
+        key = pygame.key.get_pressed()
+        
+        if move == True:
+            mov()
+        collision_with_enemy = pygame.sprite.spritecollide(player, enemy_group, True, pygame.sprite.collide_rect_ratio(0.7))
+        if collision_with_enemy:
+            move = False
+            pohled.blit(game_over,(0,0))
 
                 
         
