@@ -1,145 +1,136 @@
 import pygame
-import time
 import random
+import sys
 
-pygame.init()
-
-white = (255, 255, 255)
-#Informace lode
-vv = 5 #vertical_velocity
-hv = 7 #horizontal_velocity
-sshipx = 800 #pozice x
-sshipy = 750 #pozice y
-sshipw=50 #sirka
-sshiph=50 #vyska
-#obrazovka
-resolution_x = 1650
-resolution_y = 850
-#dimenze tlacitek
-selectionx = 500
-selectiony = 65
-selectionh = 200
-selectionw = 650
-#pozice zlacitka play
-playx = 500
-playy = 65
-#pozice tlacitka credits
-creditsx = 500
-creditsy = 330
-#pozice tlacitka quit
-quitx = 500
-quity = 595
-rocketx = 255
-rockety = 637
-movspeed = 15
-#uroven
-level = 0
-#existence rakety
-rocket = False
-#pocet zivotu
-health = 3
-#enemy
-max_enemy = 8
-max_velikost_enemy = 50
-max_sirka_enemy = 50
-
-pohled = pygame.display.set_mode((resolution_x,resolution_y))
-
-#GRAFIKA
-pygame.display.set_caption("Markovo Space Mayhem")
-bkg = pygame.image.load('bkg.jpg')
-play = pygame.image.load('play.jpg')
-credit = pygame.image.load('credits.jpg')
-end = pygame.image.load('quit.jpg')
-plays = pygame.image.load('plays.jpg')
-creditss = pygame.image.load('creditss.jpg')
-quits = pygame.image.load('quits.jpg')
-game = pygame.image.load('game.jpg')
-shot = pygame.image.load('shot.png').convert_alpha()
-sship = pygame.image.load('sship.png').convert_alpha()
-pygame.transform.scale(sship,(25,25))
 
 #Programy
+playerx = 825
+playery = 725
+vv = 5
+hv = 7
+def mov():
+    global playerx
+    global playery
+    key = pygame.key.get_pressed()
+    if key[pygame.K_UP]:
+        playery -= vv
+    if key[pygame.K_DOWN]:
+        playery += vv
+    if key[pygame.K_LEFT]:
+        playerx -= hv
+    if key[pygame.K_RIGHT]:
+        playerx += hv
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('enemy.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('sship.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+    
 def exitbutton():
     for event in pygame.event.get() :
         if event.type == pygame.QUIT :
             pygame.quit()
             quit()
+    
+        
 
-def ovladani_lodi():
-    global sshipy
-    global sshipx
-    if key[pygame.K_w]:
-        sshipy -= vv
-        if sshipy < 0:
-            sshipy = 0
-    if key[pygame.K_s]:
-        sshipy += vv
-        if sshipy > resolution_y - sshiph:
-            sshipy = resolution_y - sshiph
-    if key[pygame.K_a]:
-        sshipx -= hv
-        if sshipx < 0:
-            sshipx = 0
-    if key[pygame.K_d]:
-        sshipx += hv
-        if sshipx > resolution_x - sshipw:
-            sshipx = resolution_x - sshipw
-
-enemies = []
-for i in range(max_enemy):
-    enemy = dict()
-    
-    enemy['w'] = 50
-    enemy['h'] = enemy['w']
-    
-    enemy['x'] = random.randint(0, resolution_x - enemy['w'])
-    enemy['y'] = random.randint(0, resolution_y - enemy['h'] - 150)
-    enemy['rgb'] = (random.randint(0, 254), random.randint(0, 254), random.randint(0, 254))
-    
-    enemies.append(enemy)
-                                
-            
 #Když se level rovná 0, tak se otevře menu
-while level == 0:
-    exitbutton()
-    pohled.fill(white)
-    pohled.blit(bkg, (0,0))
-    pohled.blit(play, (selectionx,selectiony))
-    pohled.blit(credit, (selectionx, selectiony*2 + selectionh))
-    pohled.blit(end, (selectionx, selectiony*3 + selectionh*2))
-    cursor = pygame.mouse.get_pos()
+def main():
     
-    if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
-        pohled.blit(plays,(playx,playy))
-        if pygame.mouse.get_pressed()[0]:
-            # level se nastaví na 1, což je hra
-            level = 1
-    elif cursor[0] > 500 and cursor [0] < 1150 and cursor[1]  > 330 and cursor[1] < 550:
-        pohled.blit(creditss,(creditsx,creditsy))
-        if pygame.mouse.get_pressed()[0]:
-            #bud se dodělávat později, potřebuji zjistit jak vyčíst ze souboru.
-            pass
-    elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
-        pohled.blit(quits,(quitx,quity))
-        if pygame.mouse.get_pressed()[0]:
-            exit()
-    pygame.display.update()
-while level == 1:
-    exitbutton()
-    pohled.fill(white)
-    pohled.blit(game, (0,0))
-    pohled.blit(sship, (sshipx,sshipy))
-    key = pygame.key.get_pressed()
-    ovladani_lodi()
-    for enemy in enemies:
-        pygame.draw.ellipse(pohled, enemy['rgb'], (enemy['x'], enemy['y'], enemy['w'], enemy['h']))
-            
+    pygame.init()
+    resolution_x = 1650 
+    resolution_y = 850 
+    pohled = pygame.display.set_mode((resolution_x,resolution_y))
+    #GRAFIKA
+    pygame.display.set_caption("Markovo Space Mayhem")
+    bkg = pygame.image.load('bkg.jpg')
+    play = pygame.image.load('play.jpg')
+    credit = pygame.image.load('credits.jpg')
+    end = pygame.image.load('quit.jpg')
+    plays = pygame.image.load('plays.jpg')
+    creditss = pygame.image.load('creditss.jpg')
+    quits = pygame.image.load('quits.jpg')
+    game = pygame.image.load('game.jpg')
+    sship = pygame.image.load('sship.png').convert_alpha()
+    
+    white = (255, 255, 255)
+    
+    sshipw=50 #sirka
+    sshiph=50 #vyska
+    
+    #obrazovka
+    resolution_x = 1650 #rozliseni_x
+    resolution_y = 850 #rozliseni_y
+    
+    #uroven
+    level = 0
+    
+    #pocet zivotu
+    lives = 3
+    
+    #POSOTIONS
+    enemyx = random.randint(0,1630)
+    enemyy = random.randint(0,700)
+    
 
-            
-    
-    
-    
-    
-    
-    pygame.display.update()
+    while level == 0:
+        
+        exitbutton()
+        pohled.fill(white)
+        pohled.blit(bkg, (0,0)) #pozadí
+        pohled.blit(play, (500,65)) #tlacitko_play
+        pohled.blit(credit, (500, 330)) #tlacitko_credits
+        pohled.blit(end, (500, 595)) #tlacitko_quit
+        cursor = pygame.mouse.get_pos()
+        
+        if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
+            pohled.blit(plays,(500,65))
+            if pygame.mouse.get_pressed()[0]:
+                level = 1
+        elif cursor[0] > 500 and cursor [0] < 1150 and cursor[1]  > 330 and cursor[1] < 550:
+            pohled.blit(creditss,(500,330))
+            if pygame.mouse.get_pressed()[0]:
+                #bud se dodělávat později, potřebuji zjistit jak vyčíst ze souboru.
+                pass
+        elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
+            pohled.blit(quits,(500,595))
+            if pygame.mouse.get_pressed()[0]:
+                exit()
+        pygame.display.update()
+    while level == 1:
+        exitbutton()
+        pohled.fill(white)
+        pohled.blit(game, (0,0))
+        key = pygame.key.get_pressed()
+        enemy = Enemy([enemyx, enemyy])
+        enemy_group = pygame.sprite.Group()
+        enemy_group.add(enemy)
+        player = Player([playerx, playery])
+        player_group = pygame.sprite.Group()
+        player_group.add(player)
+        player_group.draw(pohled)
+        enemy_group.draw(pohled)
+        mov()
+        collision_with_enemy = pygame.sprite.spritecollide(player, enemy_group, True)
+        if collision_with_enemy:
+            pohled.fill(white)
+
+        
+
+                
+        
+        
+        
+        
+        
+        pygame.display.update()
+if __name__ == '__main__':
+    main()
