@@ -13,7 +13,8 @@ playerx = 825
 playery = 725
 enemyx = random.randint(0,1630)
 enemyy = random.randint(0,700)
-shotv = 15
+shot_velocity = 15
+rate_of_fire = 3
 vv = 5
 hv = 7
 def mov():
@@ -42,14 +43,17 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = pos
         
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self,x,y ):
+    def __init__(self, x, y):
         self.image = pygame.image.load('assets/shot.png').convert_alpha()
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
-
+        self.x = x
+        self.y = y
+    def move(self):
+        self.y -= shot_velocity
+        self.rect.y = self.y
 
     
 def exitbutton():
@@ -85,6 +89,9 @@ level = 0
 
 #pocet zivotu
 lives = 3
+
+shots = []
+rate_count = 0
 
 move = True
 
@@ -128,9 +135,7 @@ while level == 1:
     player_group = pygame.sprite.Group()
     player_group.add(player)
     
-    shot = Bullet(shotx,shoty)
     shot_group = pygame.sprite.Group()
-    shot_group.add(shot)
 
     player_group.draw(pohled)
     enemy_group.draw(pohled)
@@ -145,7 +150,20 @@ while level == 1:
     if collision_with_enemy:
         move = False
         pohled.blit(game_over,(0,0))
-    if key[pygame.K_SPACE]:
+    if key[pygame.K_SPACE] and rate_count > rate_of_fire:
+        shot = Bullet(shotx,shoty)
+        shots.append(shot)
+        rate_count = 0
+    else:
+        rate_count += 1
+    
+    for shot in shots:
+        shot.move()
+        if shot.y < 0:
+            shots.remove(shot)
+        else:
+            shot_group.add(shot)
+    else:
         shot_group.draw(pohled)
     
     if playerx > 1625:
