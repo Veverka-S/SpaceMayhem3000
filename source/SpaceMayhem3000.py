@@ -31,19 +31,19 @@ def mov():
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('enemy.png').convert_alpha()
+        self.image = pygame.image.load('assets/enemy.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.center = pos
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('sship.png').convert_alpha()
+        self.image = pygame.image.load('assets/sship.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.center = pos
         
 class Bullet(pygame.sprite.Sprite):
     def __init__(self,x,y ):
-        self.image = pygame.image.load('shot.png').convert_alpha()
+        self.image = pygame.image.load('assets/shot.png').convert_alpha()
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -67,16 +67,16 @@ def exitbutton():
 
 #GRAFIKA
 pygame.display.set_caption("Markovo Space Mayhem")
-bkg = pygame.image.load('bkg.jpg')
-play = pygame.image.load('play.jpg')
-credit = pygame.image.load('credits.jpg')
-end = pygame.image.load('quit.jpg')
-plays = pygame.image.load('plays.jpg')
-creditss = pygame.image.load('creditss.jpg')
-quits = pygame.image.load('quits.jpg')
-game = pygame.image.load('game.jpg')
-sship = pygame.image.load('sship.png').convert_alpha()
-game_over = pygame.image.load('game_over.png').convert_alpha()
+bkg = pygame.image.load('assets/bkg.jpg')
+play = pygame.image.load('assets/play.jpg')
+credit = pygame.image.load('assets/credits.jpg')
+end = pygame.image.load('assets/quit.jpg')
+plays = pygame.image.load('assets/plays.jpg')
+creditss = pygame.image.load('assets/creditss.jpg')
+quits = pygame.image.load('assets/quits.jpg')
+game = pygame.image.load('assets/game.jpg')
+sship = pygame.image.load('assets/sship.png').convert_alpha()
+game_over = pygame.image.load('assets/game_over.png').convert_alpha()
 
 white = (255, 255, 255)
 
