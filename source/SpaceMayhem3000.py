@@ -7,7 +7,7 @@ resolution_x = 1650
 resolution_y = 850 
 pohled = pygame.display.set_mode((resolution_x,resolution_y))
 pygame.init()
-#Programy
+move = True 
 #POSOTIONS
 playerx = 825
 playery = 725
@@ -30,11 +30,24 @@ def mov():
     if key[pygame.K_RIGHT]:
         playerx += hv
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, x, y, v):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('assets/enemy.png').convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.center = pos
+        self.rect.y = y
+        self.rect.x = x
+        self.y = x
+        self.y = y
+        self.v = v
+        
+    def move(self):
+        if move == True:
+            global enemyv
+            self.y -= self.v
+            self.rect.y = self.y
+
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
@@ -52,8 +65,9 @@ class Bullet(pygame.sprite.Sprite):
         self.x = x
         self.y = y
     def move(self):
-        self.y -= shot_velocity
-        self.rect.y = self.y
+        if move == True:
+            self.y -= shot_velocity
+            self.rect.y = self.y
 
     
 def exitbutton():
@@ -92,6 +106,9 @@ lives = 3
 
 shots = []
 rate_count = 0
+enemies = []
+
+enemyv = 5
 
 move = True
 
@@ -121,51 +138,75 @@ while level == 0:
             exit()
     pygame.display.update()
 while level == 1:
+    enemycount = 3
     exitbutton()
     pohled.blit(game,(0,0))
     shotx = playerx - 6.5
     shoty = playery - 15
-    v = 15
+    enemyv = 3
+    enemyonscreen = 0
+    max_enemy = 3
     
-    enemy = Enemy([enemyx,enemyy])
-    enemy_group = pygame.sprite.Group()
-    enemy_group.add(enemy)
     
     player = Player([playerx, playery])
     player_group = pygame.sprite.Group()
     player_group.add(player)
+    enemy = Enemy(enemyx, enemyy, enemyv)
+    enemies.append(enemy)
+    enemy_group = pygame.sprite.Group()
     
     shot_group = pygame.sprite.Group()
 
+
     player_group.draw(pohled)
-    enemy_group.draw(pohled)
     key = pygame.key.get_pressed()
     
     if move == True:
-        enemyy += 1
-    
-    if move == True:
         mov()
-    collision_with_enemy = pygame.sprite.spritecollide(player, enemy_group, True, pygame.sprite.collide_rect_ratio(0.7))
-    if collision_with_enemy:
-        move = False
-        pohled.blit(game_over,(0,0))
+
+    for enemy in enemies:
+        enemy.move()
+        if enemyonscreen < 1:
+            enemy_group.add(enemy)
+            enemy_group.draw(pohled)
+            enemyonscreen += 1
+            if enemy.y < 0:
+                enemy.v *= -1
+            if enemy.y > 800:
+                enemy.v *= -1
+
+
+    
+    shot = Bullet(shotx,shoty)
     if key[pygame.K_SPACE] and rate_count > rate_of_fire:
-        shot = Bullet(shotx,shoty)
         shots.append(shot)
         rate_count = 0
+        bullets_on_screen = 0
     else:
         rate_count += 1
     
     for shot in shots:
         shot.move()
-        if shot.y < 0:
-            shots.remove(shot)
+        enemy_killed = pygame.sprite.spritecollide(shot, enemy_group, True)
+        if not enemy_killed:
+            if shot.y < 0:
+                shots.remove(shot)
+            else:
+                shot_group.add(shot)
         else:
-            shot_group.add(shot)
+            move = False
     else:
         shot_group.draw(pohled)
+
+        
+        
+    collision_with_enemy = pygame.sprite.spritecollide(player, enemy_group, True, pygame.sprite.collide_rect_ratio(0.7))
     
+    if collision_with_enemy:
+        move = False
+        pohled.blit(game_over,(0,0))
+ 
+        
     if playerx > 1625:
         playerx = 1625
     if playerx < 25:
@@ -174,6 +215,7 @@ while level == 1:
         playery = 825
     if playery < 25:
         playery = 25
+        
 
             
     
