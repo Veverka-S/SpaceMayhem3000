@@ -20,25 +20,24 @@ rychlost_nepratel = 3
 
 # inicializace
 pygame.init()
-
-okno = pygame.display.set_mode((velikost_okna_x, velikost_okna_y))
 pygame.display.set_caption("Markovo Space Mayhem")
+okno = pygame.display.set_mode((velikost_okna_x, velikost_okna_y))
 
 # herni assety
-pozadi_menu = pygame.image.load('assets/bkg.jpg')
-pozadi_hra = pygame.image.load('assets/game.jpg')
+pozadi_menu = pygame.image.load('obrazky/pozadi_menu.jpg')
+pozadi_hra = pygame.image.load('obrazky/pozadi_hra.jpg')
 
-tlacitko_play = pygame.image.load('assets/play.jpg')
-tlacitko_play_vybrano = pygame.image.load('assets/plays.jpg')
-tlacitko_credits = pygame.image.load('assets/credits.jpg')
-tlacitko_credits_vybrano = pygame.image.load('assets/creditss.jpg')
-tlacitko_quit = pygame.image.load('assets/quit.jpg')
-tlacitko_quit_vybrano = pygame.image.load('assets/quits.jpg')
+tlacitko_play = pygame.image.load('obrazky/tlacitko_play.jpg')
+tlacitko_play_vybrano = pygame.image.load('obrazky/tlacitko_play_vybrano.jpg')
+tlacitko_credits = pygame.image.load('obrazky/tlacitko_credits.jpg')
+tlacitko_credits_vybrano = pygame.image.load('obrazky/tlacitko_credits_vybrano.jpg')
+tlacitko_quit = pygame.image.load('obrazky/tlacitko_quit.jpg')
+tlacitko_quit_vybrano = pygame.image.load('obrazky/tlacitko_quit_vybrano.jpg')
 
-textura_hrac = pygame.image.load('assets/sship.png').convert_alpha()
-textura_strela = pygame.image.load('assets/shot.png').convert_alpha()
-textura_nepritel = pygame.image.load('assets/enemy.png').convert_alpha()
-textura_konec_hry = pygame.image.load('assets/game_over.png').convert_alpha()
+textura_hrac = pygame.image.load('obrazky/textura_hrac.png').convert_alpha()
+textura_strela = pygame.image.load('obrazky/textura_strela.png').convert_alpha()
+textura_nepritel = pygame.image.load('obrazky/textura_nepritel.png').convert_alpha()
+textura_konec_hry = pygame.image.load('obrazky/textura_konec_hry.png').convert_alpha()
 
 # pomocne tridy
 class Hrac(pygame.sprite.Sprite):
