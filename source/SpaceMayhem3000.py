@@ -3,38 +3,55 @@ import sys
 import random
 import pygame
 
-# inicializace
-pygame.init()
-okno = pygame.display.set_mode((1650, 850))
-pygame.display.set_caption("Markovo Space Mayhem")
-
 # parametry aplikace
-pozice_hrace_x = 825
-pozice_hrace_y = 725
+velikost_okna_x = 1650
+velikost_okna_y = 850
 
 rychlost_hrace_y = 5
 rychlost_hrace_x = 7
 
+zivoty_hrace = 3
+
 rychlost_strely = 15
 rychlost_strelby = 5
-
-zivoty_hrace = 3
 
 max_pocet_nepratel = 3
 rychlost_nepratel = 3
 
+# inicializace
+pygame.init()
+
+okno = pygame.display.set_mode((velikost_okna_x, velikost_okna_y))
+pygame.display.set_caption("Markovo Space Mayhem")
+
+# herni assety
+pozadi_menu = pygame.image.load('assets/bkg.jpg')
+pozadi_hra = pygame.image.load('assets/game.jpg')
+
+tlacitko_play = pygame.image.load('assets/play.jpg')
+tlacitko_play_vybrano = pygame.image.load('assets/plays.jpg')
+tlacitko_credits = pygame.image.load('assets/credits.jpg')
+tlacitko_credits_vybrano = pygame.image.load('assets/creditss.jpg')
+tlacitko_quit = pygame.image.load('assets/quit.jpg')
+tlacitko_quit_vybrano = pygame.image.load('assets/quits.jpg')
+
+textura_hrac = pygame.image.load('assets/sship.png').convert_alpha()
+textura_strela = pygame.image.load('assets/shot.png').convert_alpha()
+textura_nepritel = pygame.image.load('assets/enemy.png').convert_alpha()
+textura_konec_hry = pygame.image.load('assets/game_over.png').convert_alpha()
+
 # pomocne tridy
 class Hrac(pygame.sprite.Sprite):
-    def __init__(self, pozice_x, pozice_y):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = textura_hrac
         
         self.rect = self.image.get_rect()
-        self.rect.x = pozice_x
-        self.rect.y = pozice_y
+        self.rect.centerx = velikost_okna_x / 2
+        self.rect.bottom = velikost_okna_y - self.rect.height / 2
         
-        vykreslovani_hraci.add(self)
+        vykreslovaci_skupina_hrac.add(self)
         
         self.rychlost_x = rychlost_hrace_x
         self.rychlost_y = rychlost_hrace_y
@@ -43,6 +60,7 @@ class Hrac(pygame.sprite.Sprite):
         self.pocitadlo_strelby = 0
         
     def update(self):
+        # ovladani pohybu
         key = pygame.key.get_pressed()
         
         if key[pygame.K_UP]:
@@ -54,17 +72,19 @@ class Hrac(pygame.sprite.Sprite):
         if key[pygame.K_RIGHT]:
             self.rect.x += self.rychlost_x
         
-        if self.rect.x > 1625:
-            self.rect.x = 1625
-        if self.rect.x < 25:
-            self.rect.x = 25
-        if self.rect.y > 825:
-            self.rect.y = 825
-        if self.rect.y < 25:
-            self.rect.y = 25
+        # omezeni pohybu
+        if self.rect.right > velikost_okna_x:
+            self.rect.right = velikost_okna_x
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.bottom > velikost_okna_y:
+            self.rect.bottom = velikost_okna_y
+        if self.rect.top < 0:
+            self.rect.top = 0
 
-        self.pocitadlo_strelby += 1
-        
+        # strelba
+        self.pocitadlo_strelby += 1        
+
         if key[pygame.K_SPACE]:
             if self.pocitadlo_strelby > self.rychlost_strelby:
                 Strela(self)
@@ -77,37 +97,43 @@ class Strela(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         
         self.rect = self.image.get_rect()
-        self.rect.x = hrac.rect.center[0] - self.rect.width / 2
-        self.rect.y = hrac.rect.center[1] - 15
+        self.rect.centerx = hrac.rect.centerx
+        self.rect.y = hrac.rect.centery - 15
         
-        vykreslovani_strely.add(self)
+        vykreslovaci_skupina_strely.add(self)
         
         self.rychlost = rychlost_strely
         
     def update(self):
         self.rect.y -= self.rychlost
         
-        if self.rect.y < 0:
+        if self.rect.bottom < 0:
             self.kill()
 
 class Nepritel(pygame.sprite.Sprite):
-    def __init__(self, pozice_x, pozice_y):
-        self.image = texture_nepritel
+    def __init__(self):
+        self.image = textura_nepritel
         
         pygame.sprite.Sprite.__init__(self)
         
         self.rect = self.image.get_rect()
-        self.rect.x = pozice_x
-        self.rect.y = pozice_y
+        # nahodne horizontalni umisteni
+        self.rect.x = random.randint(0, velikost_okna_x - self.rect.width)
+        # zacina tesne nad okrajem okna
+        self.rect.y = -self.rect.height
         
-        vykreslovani_nepratele.add(self)
+        # zabraneni kolizim s dalsimi neprateli
+        while pygame.sprite.spritecollide(self, vykreslovaci_skupina_nepratele, False):
+            self.rect.x = random.randint(0, velikost_okna_x - self.rect.width)
         
+        vykreslovaci_skupina_nepratele.add(self)
+                
         self.rychlost = rychlost_nepratel
     
     def update(self):
         self.rect.y += self.rychlost
         
-        if self.rect.y > 850:
+        if self.rect.top > velikost_okna_y:
             self.kill()
 
 # pomocne funkce
@@ -115,10 +141,11 @@ def zkontrolovat_vypnuti_hry():
     for event in pygame.event.get() :
         if event.type == pygame.QUIT :
             pygame.quit()
-            quit()
+            sys.exit()
+    
     if pygame.key.get_pressed()[pygame.K_ESCAPE]:
         pygame.quit()
-        quit()
+        sys.exit()
 
 def zobrazit_menu():
     okno.fill((255, 255, 255))
@@ -128,7 +155,7 @@ def zobrazit_menu():
     okno.blit(tlacitko_quit, (500, 595))
 
 def zobrazit_konec_hry():
-    okno.blit(textura_konec, (0, 0))
+    okno.blit(textura_konec_hry, (0, 0))
     
     while True:
         zkontrolovat_vypnuti_hry()
@@ -156,29 +183,12 @@ def vybrat_z_menu():
         if pygame.mouse.get_pressed()[0]:
             exit()
 
-# herni assety
-pozadi_menu = pygame.image.load('assets/bkg.jpg')
-pozadi_hra = pygame.image.load('assets/game.jpg')
-
-tlacitko_play = pygame.image.load('assets/play.jpg')
-tlacitko_play_vybrano = pygame.image.load('assets/plays.jpg')
-tlacitko_credits = pygame.image.load('assets/credits.jpg')
-tlacitko_credits_vybrano = pygame.image.load('assets/creditss.jpg')
-tlacitko_quit = pygame.image.load('assets/quit.jpg')
-tlacitko_quit_vybrano = pygame.image.load('assets/quits.jpg')
-
-textura_hrac = pygame.image.load('assets/sship.png').convert_alpha()
-textura_strela = pygame.image.load('assets/shot.png').convert_alpha()
-texture_nepritel = pygame.image.load('assets/enemy.png').convert_alpha()
-
-textura_konec = pygame.image.load('assets/game_over.png').convert_alpha()
-
 # zacatek programu
-vykreslovani_hraci = pygame.sprite.Group()
-vykreslovani_strely = pygame.sprite.Group()
-vykreslovani_nepratele = pygame.sprite.Group()
+vykreslovaci_skupina_hrac = pygame.sprite.Group()
+vykreslovaci_skupina_strely = pygame.sprite.Group()
+vykreslovaci_skupina_nepratele = pygame.sprite.Group()
 
-hrac = Hrac(pozice_hrace_x, pozice_hrace_y)
+hrac = Hrac()
 
 rezim_hry = 'menu'
 
@@ -193,25 +203,24 @@ while rezim_hry == 'menu':
 while rezim_hry == 'hra':
     zkontrolovat_vypnuti_hry()
     
-    okno.blit(pozadi_hra,(0,0))
+    okno.blit(pozadi_hra, (0, 0))
     
-    if len(vykreslovani_nepratele.sprites()) < max_pocet_nepratel:
-        Nepritel(random.randint(0,1630), 0)
+    if len(vykreslovaci_skupina_nepratele.sprites()) < max_pocet_nepratel:
+        Nepritel()
 
-    pygame.sprite.groupcollide(vykreslovani_nepratele, vykreslovani_strely, True, True)
+    pygame.sprite.groupcollide(vykreslovaci_skupina_nepratele, vykreslovaci_skupina_strely, True, True)
     
-    if pygame.sprite.groupcollide(vykreslovani_hraci, vykreslovani_nepratele, False, True):
+    if pygame.sprite.groupcollide(vykreslovaci_skupina_hrac, vykreslovaci_skupina_nepratele, False, True):
         zivoty_hrace -= 1
-        
         if zivoty_hrace == 0:
             zobrazit_konec_hry()
 
-    vykreslovani_hraci.update()
-    vykreslovani_strely.update()
-    vykreslovani_nepratele.update()
+    vykreslovaci_skupina_hrac.update()
+    vykreslovaci_skupina_strely.update()
+    vykreslovaci_skupina_nepratele.update()
     
-    vykreslovani_hraci.draw(okno)
-    vykreslovani_strely.draw(okno)
-    vykreslovani_nepratele.draw(okno)
+    vykreslovaci_skupina_hrac.draw(okno)
+    vykreslovaci_skupina_strely.draw(okno)
+    vykreslovaci_skupina_nepratele.draw(okno)
     
     pygame.display.update()
