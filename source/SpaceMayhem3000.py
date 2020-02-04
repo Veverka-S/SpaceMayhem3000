@@ -155,11 +155,11 @@ def zobrazit_menu():
     okno.blit(tlacitko_quit, (500, 595))
 
 def zobrazit_konec_hry():
+    okno.blit(pozadi_hra, (0, 0))
     okno.blit(textura_konec_hry, (0, 0))
     
     while True:
         zkontrolovat_vypnuti_hry()
-        
         pygame.display.update()
 
 def vybrat_z_menu():
@@ -176,7 +176,7 @@ def vybrat_z_menu():
         okno.blit(tlacitko_credits_vybrano, (500, 330))
         
         if pygame.mouse.get_pressed()[0]:
-            pass
+            pass # TODO
     elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
         okno.blit(tlacitko_quit_vybrano, (500, 595))
         
@@ -201,20 +201,24 @@ while rezim_hry == 'menu':
     pygame.display.update()
 
 while rezim_hry == 'hra':
+    # vypinani
     zkontrolovat_vypnuti_hry()
     
-    okno.blit(pozadi_hra, (0, 0))
-    
+    # generovani nepratel
     if len(vykreslovaci_skupina_nepratele.sprites()) < max_pocet_nepratel:
         Nepritel()
-
+    # sestrelovani nepratel
     pygame.sprite.groupcollide(vykreslovaci_skupina_nepratele, vykreslovaci_skupina_strely, True, True)
     
+    # srazka hrace s nepritelem
     if pygame.sprite.groupcollide(vykreslovaci_skupina_hrac, vykreslovaci_skupina_nepratele, False, True):
         zivoty_hrace -= 1
         if zivoty_hrace == 0:
             zobrazit_konec_hry()
-
+    
+    # vykresleni
+    okno.blit(pozadi_hra, (0, 0))
+        
     vykreslovaci_skupina_hrac.update()
     vykreslovaci_skupina_strely.update()
     vykreslovaci_skupina_nepratele.update()
