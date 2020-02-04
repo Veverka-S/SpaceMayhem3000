@@ -11,7 +11,7 @@ move = True
 #POSOTIONS
 playerx = 825
 playery = 725
-enemyx = random.randint(0,1630)
+enemyx = random.randint(0,1600)
 enemyy = random.randint(0,700)
 shot_velocity = 15
 rate_of_fire = 3
@@ -161,12 +161,13 @@ while level == 1:
     player_group.draw(pohled)
     key = pygame.key.get_pressed()
     
+    #umozneni
     if move == True:
         mov()
 
     for enemy in enemies:
         enemy.move()
-        if enemyonscreen < 1:
+        if enemyonscreen < max_enemy:
             enemy_group.add(enemy)
             enemy_group.draw(pohled)
             enemyonscreen += 1
@@ -187,7 +188,7 @@ while level == 1:
     
     for shot in shots:
         shot.move()
-        enemy_killed = pygame.sprite.spritecollide(shot, enemy_group, True)
+        enemy_killed = pygame.sprite.spritecollide(shot, enemy_group, True, pygame.sprite.collide_rect_ratio(0.5))
         if not enemy_killed:
             if shot.y < 0:
                 shots.remove(shot)
