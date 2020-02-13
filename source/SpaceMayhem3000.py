@@ -141,6 +141,7 @@ quits = pygame.image.load('assets/quits.jpg')
 game = pygame.image.load('assets/game.jpg')
 sship = pygame.image.load('assets/sship.png').convert_alpha()
 game_over = pygame.image.load('assets/game_over.png').convert_alpha()
+dead_enemy = pygame.image.load('assets/dead_enemy.png').convert_alpha()
 
 white = (255, 255, 255)
 
@@ -166,11 +167,12 @@ while level == 0:
     pygame.display.update()
     
 while level == 1:
+    white = (255,255,255)
     exitbutton()
     pohled.blit(game,(0,0))
     
-    enemy_x = random.randint(0, dis_width - 50)
-    enemy_y = random.randint(0, dis_height - 50)
+    enemy_x = 825
+    enemy_y = 200
     shotx = ship_x + 18
     shoty = ship_y
     
@@ -185,6 +187,7 @@ while level == 1:
     enemy_group = pygame.sprite.Group()
     enemy_group.add(enemy)
     enemy_group.draw(pohled)
+    
     
     shot_group = pygame.sprite.Group()
 
@@ -215,8 +218,10 @@ while level == 1:
                 shot_group.add(shot)
         else:
             move = False
+            pohled.blit(dead_enemy,(enemy_x,enemy_y))
     else:
         shot_group.draw(pohled)
+
     
     collision_detection()
  
