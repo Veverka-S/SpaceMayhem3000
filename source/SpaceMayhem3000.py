@@ -1,228 +1,290 @@
-import pygame
-import random
+# pouzite baliky/knihovny
 import sys
+import random
+import pygame as pg
 
+# parametry aplikace
+velikost_okna_x = 1650
+velikost_okna_y = 850
 
-dis_width = 1650 
-dis_height = 850 
-pohled = pygame.display.set_mode((dis_width,dis_height))
-pygame.init()
-move = True 
-#POSOTIONS
-enemyx = random.randint(0,1600)
-enemyy = random.randint(0,700)
-shot_velocity = 15
-rate_of_fire = 3
-ship_vv = 5
-ship_hv = 7
-ship_x = 825
-ship_y = 725
+rychlost_hrace_y = 5
+rychlost_hrace_x = 7
 
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, v):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('assets/enemy.png').convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.y = y
-        self.rect.x = x
-        self.y = x
-        self.y = y
-        self.v = v
+zivoty_hrace = 3
+skore = 0
+
+rychlost_strely = 10
+rychlost_strelby = 8
+
+max_pocet_nepratel = 5
+rychlost_nepratel = 2
+
+# inicializace
+pg.init()
+pg.display.set_caption("Markovo Space Mayhem")
+okno = pg.display.set_mode((velikost_okna_x, velikost_okna_y))
+
+# herni assety
+menu_pozadi = pg.image.load('obrazky/menu_pozadi.jpg')
+herni_pozadi = pg.image.load('obrazky/herni_pozadi.jpg')
+
+tlacitko_play = pg.image.load('obrazky/tlacitko_play.jpg')
+tlacitko_play_vybrane = pg.image.load('obrazky/tlacitko_play_vybrane.jpg')
+tlacitko_credits = pg.image.load('obrazky/tlacitko_credits.jpg')
+tlacitko_credits_vybrane = pg.image.load('obrazky/tlacitko_credits_vybrane.jpg')
+tlacitko_quit = pg.image.load('obrazky/tlacitko_quit.jpg')
+tlacitko_quit_vybrane = pg.image.load('obrazky/tlacitko_quit_vybrane.jpg')
+tlacitko_endless_game = pg.image.load('obrazky/tlacitko_endless_game.jpg')
+
+hrac = pg.image.load('obrazky/hrac.png').convert_alpha()
+strela = pg.image.load('obrazky/strela.png').convert_alpha()
+nepritel = pg.image.load('obrazky/nepritel.png').convert_alpha()
+konec_hry = pg.image.load('obrazky/konec_hry.png').convert_alpha()
+
+# pomocne tridy
+class Hrac(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+
+        self.image = hrac
         
-    def move(self):
-        if move == True:
-            global enemy_v
-            self.y -= self.v
-            self.rect.y = self.y
-
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        self.image = pygame.image.load('assets/sship.png').convert_alpha()
-        pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.y = y
-        self.x = x
+        self.rect.centerx = velikost_okna_x / 2
+        self.rect.bottom = velikost_okna_y - self.rect.height / 2
         
-    def mov():
-        if move == True:
-            global ship_x
-            global ship_y
-            key = pygame.key.get_pressed()
-            if key[pygame.K_UP]:
-                ship_y -= ship_vv
-            if key[pygame.K_DOWN]:
-                ship_y += ship_vv
-            if key[pygame.K_LEFT]:
-                ship_x -= ship_hv
-            if key[pygame.K_RIGHT]:
-                ship_x += ship_hv
-            if ship_x > dis_width - 50:
-                ship_x = dis_width - 50
-            if ship_x < 0:
-                ship_x = 0
-            if ship_y > dis_height - 50:
-                ship_y = dis_height - 50
-            if ship_y < 0:
-                ship_y = 0
+        vykreslovaci_skupina_hrac.add(self)
+        
+        self.rychlost_x = rychlost_hrace_x
+        self.rychlost_y = rychlost_hrace_y
+        
+        self.rychlost_strelby = rychlost_strelby
+        self.pocitadlo_strelby = 0
+        
+    def update(self):
+        # ovladani pohybu
+        key = pg.key.get_pressed()
+        
+        if key[pg.K_UP]:
+            self.rect.y -= self.rychlost_y
+        if key[pg.K_DOWN]:
+            self.rect.y += self.rychlost_y
+        if key[pg.K_LEFT]:
+            self.rect.x -= self.rychlost_x
+        if key[pg.K_RIGHT]:
+            self.rect.x += self.rychlost_x
+        
+        # omezeni pohybu
+        if self.rect.right > velikost_okna_x:
+            self.rect.right = velikost_okna_x
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.bottom > velikost_okna_y:
+            self.rect.bottom = velikost_okna_y
+        if self.rect.top < 0:
+            self.rect.top = 0
+
+        # strelba
+        self.pocitadlo_strelby += 1        
+
+        if key[pg.K_SPACE]:
+            if self.pocitadlo_strelby > self.rychlost_strelby:
+                Strela(self)
+                self.pocitadlo_strelby = 0
+
+class Strela(pg.sprite.Sprite):
+    def __init__(self, hrac):
+        self.image = strela
+        
+        pg.sprite.Sprite.__init__(self)
+        
+        self.rect = self.image.get_rect()
+        self.rect.centerx = hrac.rect.centerx
+        self.rect.y = hrac.rect.centery - 15
+        
+        vykreslovaci_skupina_strely.add(self)
+        
+        self.rychlost = rychlost_strely
+        
+    def update(self):
+        self.rect.y -= self.rychlost
+        
+        if self.rect.bottom < 0:
+            self.kill()
+
+class Nepritel(pg.sprite.Sprite):
+    def __init__(self):
+        self.image = nepritel
+        
+        pg.sprite.Sprite.__init__(self)
+        
+        self.rect = self.image.get_rect()
+        # nahodne horizontalni umisteni
+        self.rect.x = random.randint(0, velikost_okna_x - self.rect.width)
+        # zacina tesne nad okrajem okna
+        self.rect.y = -self.rect.height
+        
+        # zabraneni kolizim s dalsimi neprateli
+        while pg.sprite.spritecollide(self, vykreslovaci_skupina_nepratele, False):
+            self.rect.x = random.randint(0, velikost_okna_x - self.rect.width)
+        
+        vykreslovaci_skupina_nepratele.add(self)
                 
+        self.rychlost = rychlost_nepratel
+    
+    def update(self):
+        self.rect.y += self.rychlost
         
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        self.image = pygame.image.load('assets/shot.png').convert_alpha()
-        pygame.sprite.Sprite.__init__(self)
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.x = x
-        self.y = y
-        
-    def move(self):
-        if move == True:
-            self.y -= shot_velocity
-            self.rect.y = self.y
+        if self.rect.top > velikost_okna_y:
+            self.kill()
 
+# pomocne funkce
+def zkontrolovat_vypnuti_hry():
+    for event in pg.event.get() :
+        if event.type == pg.QUIT :
+            pg.quit()
+            sys.exit()
     
-def exitbutton():
-    for event in pygame.event.get() :
-        if event.type == pygame.QUIT :
-            pygame.quit()
-            quit()
-            
-def collision_detection():
-    collision_with_enemy = pygame.sprite.spritecollide(player, enemy_group, True, pygame.sprite.collide_rect_ratio(0.7))
-    
-    if collision_with_enemy:
-        move = False
-        pohled.blit(game_over,(0,0))
+    if pg.key.get_pressed()[pg.K_ESCAPE]:
+        pg.quit()
+        sys.exit()
 
-def menu_buttons():
-    global level
-    pohled.blit(bkg, (0,0)) #pozadí
-    pohled.blit(play, (500,65)) #tlacitko_play
-    pohled.blit(credit, (500, 330)) #tlacitko_credits
-    pohled.blit(end, (500, 595)) #tlacitko_quit
+def zobrazit_menu():
+    okno.fill((255, 255, 255))
+    okno.blit(menu_pozadi, (0, 0))
+    okno.blit(tlacitko_play, (500, 65))
+    okno.blit(tlacitko_credits, (500, 330))
+    okno.blit(tlacitko_quit, (500, 595))
+
+def zobrazit_vyber_modu():
+    okno.fill((255,255,255))
+    okno.blit(menu_pozadi,(0,0))
+    okno.blit(tlacitko_endless_game,(500,300))
     
-    cursor = pygame.mouse.get_pos()
+
+def zobrazit_konec_hry():
+    okno.blit(herni_pozadi, (0, 0))
+    okno.blit(konec_hry, (0, 0))
+    
+    font = pg.font.Font(None, 50)
+    s = "Final score: " + str(skore)
+    text = font.render(s, 1, (255,255,255))
+    okno.blit(text,(700,600))
+    
+    while True:
+        zkontrolovat_vypnuti_hry()
+        pg.display.update()
+
+def zobrazeni_zivotu():
+    if zivoty_hrace == 3:
+        font = pg.font.Font(None,25)
+        s = "Health: " + str(zivoty_hrace)
+        text = font.render(s, 1, (255,255,255))
+        okno.blit(text,(0,0))
+    elif zivoty_hrace == 2:
+        font = pg.font.Font(None,25)
+        s = "Health: " + str(zivoty_hrace)
+        text = font.render(s, 1, (200,100,0))
+        okno.blit(text,(0,0))
+    elif zivoty_hrace == 1:
+        font = pg.font.Font(None,25)
+        s = "Health: " + str(zivoty_hrace)
+        text = font.render(s, 1, (255,0,0))
+        okno.blit(text,(0,0))
+    
+def zobrazeni_skore_ve_hre():
+    font = pg.font.Font(None, 25)
+    s = "Score: " + str(skore)
+    text = font.render(s,1,(255,255,255))
+    okno.blit(text,(0,25))
+
+def vybrat_z_menu():
+    global herni_mod
+    
+    cursor = pg.mouse.get_pos()
     
     if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
-        pohled.blit(plays,(500,65))
-        if pygame.mouse.get_pressed()[0]:
-            level = 1
+        okno.blit(tlacitko_play_vybrane, (500, 65))
+        
+        if pg.mouse.get_pressed()[0]:
+            herni_mod = 'vyber_modu'
     elif cursor[0] > 500 and cursor [0] < 1150 and cursor[1]  > 330 and cursor[1] < 550:
-        pohled.blit(creditss,(500,330))
-        if pygame.mouse.get_pressed()[0]:
-            #bud se dodělávat později, potřebuji zjistit jak vyčíst ze souboru.
-            pass
+        okno.blit(tlacitko_credits_vybrane, (500, 330))
+        
+        if pg.mouse.get_pressed()[0]:
+            pass # TODO
     elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
-        pohled.blit(quits,(500,595))
-        if pygame.mouse.get_pressed()[0]:
+        okno.blit(tlacitko_quit_vybrane, (500, 595))
+        
+        if pg.mouse.get_pressed()[0]:
             exit()
-    pygame.display.update()
 
+def vybirani_herniho_modu():
+    global herni_mod
+    
+    cursor = pg.mouse.get_pos()
+    
+    
+    if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 300 and cursor[1] < 500:
+        if pg.mouse.get_pressed()[0]:
+            herni_mod = 'nekonecna_hra'
+    
+# zacatek programu
+vykreslovaci_skupina_hrac = pg.sprite.Group()
+vykreslovaci_skupina_strely = pg.sprite.Group()
+vykreslovaci_skupina_nepratele = pg.sprite.Group()
 
+hrac = Hrac()
 
+herni_mod = 'menu'
+
+while herni_mod == 'menu':
+    zkontrolovat_vypnuti_hry()
+    
+    zobrazit_menu()
+    vybrat_z_menu()
+
+    pg.display.update()
+
+while herni_mod == 'vyber_modu':
+    zkontrolovat_vypnuti_hry()
+    
+    zobrazit_vyber_modu()
+    vybirani_herniho_modu()
+    
+    
+    pg.display.update()
+
+while herni_mod == 'nekonecna_hra':
+    # vypinani
+    zkontrolovat_vypnuti_hry()
+    
+    # generovani nepratel
+    if len(vykreslovaci_skupina_nepratele.sprites()) < max_pocet_nepratel:
+        Nepritel()
+    # sestrelovani nepratel
+    if pg.sprite.groupcollide(vykreslovaci_skupina_nepratele, vykreslovaci_skupina_strely, True, True):
+        skore +=  100
+    
+    # srazka hrace s nepritelem
+    if pg.sprite.groupcollide(vykreslovaci_skupina_hrac, vykreslovaci_skupina_nepratele, False, True):
+        zivoty_hrace -= 1
+        if zivoty_hrace == 0:
+            zobrazit_konec_hry()
+
+    
+    # vykresleni
+    okno.blit(herni_pozadi, (0, 0))
         
+    vykreslovaci_skupina_hrac.update()
+    vykreslovaci_skupina_strely.update()
+    vykreslovaci_skupina_nepratele.update()
+    
+    vykreslovaci_skupina_hrac.draw(okno)
+    vykreslovaci_skupina_strely.draw(okno)
+    vykreslovaci_skupina_nepratele.draw(okno)
+    
+    zobrazeni_zivotu()
+    zobrazeni_skore_ve_hre()
+    
+    pg.display.update()
 
-#Když se level rovná 0, tak se otevře menu
-
-#GRAFIKA
-pygame.display.set_caption("Markovo Space Mayhem")
-bkg = pygame.image.load('assets/bkg.jpg')
-play = pygame.image.load('assets/play.jpg')
-credit = pygame.image.load('assets/credits.jpg')
-end = pygame.image.load('assets/quit.jpg')
-plays = pygame.image.load('assets/plays.jpg')
-creditss = pygame.image.load('assets/creditss.jpg')
-quits = pygame.image.load('assets/quits.jpg')
-game = pygame.image.load('assets/game.jpg')
-sship = pygame.image.load('assets/sship.png').convert_alpha()
-game_over = pygame.image.load('assets/game_over.png').convert_alpha()
-dead_enemy = pygame.image.load('assets/dead_enemy.png').convert_alpha()
-
-white = (255, 255, 255)
-
-#uroven
-level = 0
-
-#pocet zivotu
-lives = 3
-
-shots = []
-rate_count = 0
-enemies = []
-
-enemy_v = 5
-
-move = True
-
-
-while level == 0:
-    
-    exitbutton()
-    menu_buttons()
-    pygame.display.update()
-    
-while level == 1:
-    white = (255,255,255)
-    exitbutton()
-    pohled.blit(game,(0,0))
-    
-    enemy_x = 825
-    enemy_y = 200
-    shotx = ship_x + 18
-    shoty = ship_y
-    
-    max_enemies = 10
-    
-    #GENERACE HRACE
-    player = Player(ship_x, ship_y)
-    player_group = pygame.sprite.Group()
-    player_group.add(player)
-    
-    enemy = Enemy(enemy_x, enemy_y, 15)
-    enemy_group = pygame.sprite.Group()
-    enemy_group.add(enemy)
-    enemy_group.draw(pohled)
-    
-    
-    shot_group = pygame.sprite.Group()
-
-    player_group.draw(pohled)
-    
-    key = pygame.key.get_pressed()
-    
-    #POHYB HRACE - FINALNI VERZE
-    Player.mov()
-    
-        
-    #STRILENI
-    shot = Bullet(shotx,shoty)
-    if key[pygame.K_SPACE] and rate_count > rate_of_fire:
-        shots.append(shot)
-        rate_count = 0
-        bullets_on_screen = 0
-    else:
-        rate_count += 1
-    
-    for shot in shots:
-        shot.move()
-        enemy_killed = pygame.sprite.spritecollide(shot, enemy_group, True, pygame.sprite.collide_rect_ratio(0.5))
-        if not enemy_killed:
-            if shot.y < 0:
-                shots.remove(shot)
-            else:
-                shot_group.add(shot)
-        else:
-            move = False
-            pohled.blit(dead_enemy,(enemy_x,enemy_y))
-    else:
-        shot_group.draw(pohled)
-
-    
-    collision_detection()
- 
-    pygame.display.update()
