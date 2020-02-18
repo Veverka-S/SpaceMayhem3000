@@ -23,7 +23,7 @@ max_enemy_lvl3 = 12
 
 player_health = 3
 
-score = 0
+current_score = 0
 
 game_mode = 'menu'
 ###########################################################################################
@@ -205,9 +205,17 @@ def game_over_screen():
         game_quit()
         game.blit(menu_bkg,(0,0))
         game.blit(game_over,(0,0))
-        
+        font = pg.font.Font(None,50)
+        s = "Your score was: " + str(current_score)
+        text = font.render(s,1,(255,255,255))
+        game.blit(text,(500, 700))
         pg.display.update()
 
+def score():
+    font = pg.font.Font(None,25)
+    s = "Score: " + str(current_score)
+    text = font.render(s,1,(255,255,255))
+    game.blit(text,(0,25))
 
 
 player = Player()
@@ -235,12 +243,12 @@ while game_mode == 'endless_game':
     
     if player_collided_with_enemy:
         player_health -= 1
-        score -= 50
+        current_score -= 50
         if player_health == 0:
             game_over_screen()
         
     if enemy_hit:
-        score += 100
+        current_score += 100
     
     game.blit(game_bkg,(0,0))
     
@@ -252,6 +260,7 @@ while game_mode == 'endless_game':
     enemy_group.draw(game)
     bullet_group.draw(game)
     zobrazeni_zivotu()
+    score()
     
     pg.display.update()
     
