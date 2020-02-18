@@ -10,15 +10,20 @@ resolution_y = 850
 player_velocity_x = 7
 player_velocity_y = 5
 
-enemy_velocity_x = 3
-enemy_velocity_y = 5
+enemy_velocity_y = random.randint(3,7)
 
 bullet_velocity = 10
 bullet_count = 0
 
+max_enemy_endless_game = 3
+
 max_enemy_lvl1 = 5
 max_enemy_lvl2 = 8
 max_enemy_lvl3 = 12
+
+player_health = 3
+
+score = 0
 
 game_mode = 'menu'
 ###########################################################################################
@@ -51,9 +56,9 @@ class Player(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
         self.image = player
-        self.rect = self.image.get.rect()
-        self.rect.center = resolution_x / 2
-        self.rect.bottom = resolution_y - self.rect.height
+        self.rect = self.image.get_rect()
+        self.rect.centerx = resolution_x / 2
+        self.rect.bottom = resolution_y - self.rect.height / 2
         
         player_group.add(self)
         
@@ -66,18 +71,18 @@ class Player(pg.sprite.Sprite):
     def update(self):
         b = pg.key.get_pressed()
         
-        if b[K_UP] or b[K_w]:
+        if b[pg.K_UP] or b[pg.K_w]:
             self.rect.y -= self.velocity_y
-        if b[K_DOWN] or b[K_s]:
+        if b[pg.K_DOWN] or b[pg.K_s]:
             self.rect.y += self.velocity_y
-        if b[K_LEFT] or b[K_a]:
+        if b[pg.K_LEFT] or b[pg.K_a]:
             self.rect.x -= self.velocity_x
-        if b[K_RIGHT] or b[K_d]:
+        if b[pg.K_RIGHT] or b[pg.K_d]:
             self.rect.x += self.velocity_x
         
         self.bullet_count += 1
         
-        if b[K_SPACE]:
+        if b[pg.K_SPACE]:
             if self.bullet_count > self.bullet_velocity:
                 Bullet(self)
                 self.bullet_count = 0
@@ -86,13 +91,13 @@ class Player(pg.sprite.Sprite):
             self.rect.right = resolution_x
         if self.rect.left < 0:
             self.rect.left = 0
-        if self.rect.top > resolution_y:
-            self.rect.top = resolution_y
-        if self.rect.bottom < 0:
-            self.rect.bottom = 0
+        if self.rect.top > resolution_y - 50:
+            self.rect.top = resolution_y - 50
+        if self.rect.bottom < 0 + 50:
+            self.rect.bottom = 0 + 50
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, player):
         pg.sprite.Sprite.__init__(self)
         self.image = bullet
         self.rect = self.image.get_rect()
@@ -113,23 +118,17 @@ class Enemy(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.image = enemy
         self.rect = self.image.get_rect()
-        self.rect.y = random.randint(0, resolution_y /1.3)
+        self.rect.y = 200
         self.rect.x = random.randint(0, resolution_x - self.rect.width)
         
         enemy_group.add(self)
         
         self.velocity_y = enemy_velocity_y
-        self.velocity_x = enemy_velocity_x
     
     def update(self):
         
-        self.rect.y += self.velocity.y
-        self.rect.x -= self.velocity_x
+        self.rect.y += self.velocity_y
         
-        if self.rect.x > resolution_y - self.rect.width:
-            self.velocity_x *= -1
-        if self.rect.x < 0:
-            self.velocity.x *= -1
         if self.rect.y > resolution_y - self.rect.height:
             self.velocity_y *= -1
         if self.rect.y < 0:
@@ -183,7 +182,35 @@ def game_selection_menu():
     if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 300 and cursor[1] < 500:
         if pg.mouse.get_pressed()[0]:
             game_mode = 'endless_game'
+
+def zobrazeni_zivotu():
+    if player_health == 3:
+        font = pg.font.Font(None,25)
+        s = "Health: " + str(player_health)
+        text = font.render(s, 1, (255,255,255))
+        game.blit(text,(0,0))
+    elif player_health == 2:
+        font = pg.font.Font(None,25)
+        s = "Health: " + str(player_health)
+        text = font.render(s, 1, (200,100,0))
+        game.blit(text,(0,0))
+    elif player_health == 1:
+        font = pg.font.Font(None,25)
+        s = "Health: " + str(player_health)
+        text = font.render(s, 1, (255,0,0))
+        game.blit(text,(0,0))
     
+def game_over_screen():
+    while True:
+        game_quit()
+        game.blit(menu_bkg,(0,0))
+        game.blit(game_over,(0,0))
+        
+        pg.display.update()
+
+
+
+player = Player()
 
 
 while game_mode == 'menu':
@@ -198,6 +225,39 @@ while game_mode == 'game_selection':
 
     pg.display.update()
 
+while game_mode == 'endless_game':
+    game_quit()
+    if len(enemy_group.sprites()) < max_enemy_endless_game:
+        Enemy()
+
+    player_collided_with_enemy = pg.sprite.groupcollide(player_group, enemy_group, False, True)
+    enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group, True, True)
+    
+    if player_collided_with_enemy:
+        player_health -= 1
+        score -= 50
+        if player_health == 0:
+            game_over_screen()
+        
+    if enemy_hit:
+        score += 100
+    
+    game.blit(game_bkg,(0,0))
+    
+    player_group.update()
+    enemy_group.update()
+    bullet_group.update()
+    
+    player_group.draw(game)
+    enemy_group.draw(game)
+    bullet_group.draw(game)
+    zobrazeni_zivotu()
+    
+    pg.display.update()
+    
+    
+    
+    
 
 
 
