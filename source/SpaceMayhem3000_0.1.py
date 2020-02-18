@@ -16,6 +16,11 @@ enemy_velocity_y = 5
 bullet_velocity = 10
 bullet_count = 0
 
+max_enemy_lvl1 = 5
+max_enemy_lvl2 = 8
+max_enemy_lvl3 = 12
+
+game_mode = 'menu'
 ###########################################################################################
 #GAME_SCREEN
 pg.init()
@@ -42,7 +47,7 @@ game_over = pg.image.load('obrazky/konec_hry.png').convert_alpha()
 
 ###########################################################################################
 #GAME_CLASSES
-class Player(pygame.sprite.Sprite):
+class Player(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
         self.image = player
@@ -55,11 +60,11 @@ class Player(pygame.sprite.Sprite):
         self.velocity_x = player_velocity_x
         self.velocity_y = player_velocity_y
         
-        self.bullet_velocity = velocity
+        self.bullet_velocity = bullet_velocity
         self.bullet_count = 0
         
     def update(self):
-        b = pygame.key.get_pressed()
+        b = pg.key.get_pressed()
         
         if b[K_UP] or b[K_w]:
             self.rect.y -= self.velocity_y
@@ -86,7 +91,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.rect.bottom = 0
 
-class Bullet(pygame.sprite.Sprite):
+class Bullet(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
         self.image = bullet
@@ -94,7 +99,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center = player.rect.center
         self.rect.y = player.rect.y
         
-        Bullet_group.add(self)
+        bullet_group.add(self)
         
         self.velocity = bullet_velocity
     def update(self):
@@ -103,7 +108,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.y < 0:
             self.kill()
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
         self.image = enemy
@@ -114,6 +119,7 @@ class Enemy(pygame.sprite.Sprite):
         enemy_group.add(self)
         
         self.velocity_y = enemy_velocity_y
+        self.velocity_x = enemy_velocity_x
     
     def update(self):
         
@@ -129,6 +135,11 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.y < 0:
             self.velocity_y *= -1
 ###########################################################################################
+#GAME_SPRITE_GROUPS
+player_group = pg.sprite.Group()
+enemy_group = pg.sprite.Group()
+bullet_group = pg.sprite.Group()
+###########################################################################################
 #GAME_MENUS_AND_BUTTONS
 
 def game_quit():
@@ -136,4 +147,58 @@ def game_quit():
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
+
+def game_menu():
+    global game_mode
+    cursor = pg.mouse.get_pos()
+
+    game.blit(menu_bkg,(0,0))
+    game.blit(play_button,(500,65))
+    game.blit(credits_button,(500,330))
+    game.blit(quit_button,(500,595))
+
+    if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
+        game.blit(play_button_selected, (500, 65))
+        if pg.mouse.get_pressed()[0]:
+            game_mode = 'game_selection'
+
+    elif cursor[0] > 500 and cursor [0] < 1150 and cursor[1]  > 330 and cursor[1] < 550:
+        game.blit(credits_button_selected, (500, 330))
+        if pg.mouse.get_pressed()[0]:
+            game_mode = 'credits'
+
+    elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
+        game.blit(quit_button_selected, (500, 595))       
+        if pg.mouse.get_pressed()[0]:
+            exit()
+
+def game_selection_menu():
+    global game_mode
+    cursor = pg.mouse.get_pos()
+    
+    game.fill((255,255,255))
+    game.blit(menu_bkg,(0,0))
+    game.blit(endless_game_button,(500,300))
+    
+    if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 300 and cursor[1] < 500:
+        if pg.mouse.get_pressed()[0]:
+            game_mode = 'endless_game'
+    
+
+
+while game_mode == 'menu':
+    game_quit()
+    game_menu()
+
+    pg.display.update()
+
+while game_mode == 'game_selection':
+    game_quit()
+    game_selection_menu()
+
+    pg.display.update()
+
+
+
+
         
