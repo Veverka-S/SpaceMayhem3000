@@ -7,23 +7,24 @@ import pygame as pg
 resolution_x = 1650
 resolution_y = 850
 
-player_velocity_x = 7
-player_velocity_y = 5
+player_velocity_x = 15
+player_velocity_y = 12
 
-enemy_velocity_y = random.randint(3,7)
+enemy_velocity_y = 1
 
 bullet_velocity = 10
 bullet_count = 0
 
 max_enemy_endless_game = 3
 
-max_enemy_lvl1 = 5
-max_enemy_lvl2 = 8
-max_enemy_lvl3 = 12
+max_enemy = 5
 
 player_health = 3
 
 current_score = 0
+
+button_width = 850
+button_height = 150
 
 game_mode = 'menu'
 ###########################################################################################
@@ -44,6 +45,11 @@ credits_button_selected = pg.image.load('obrazky/tlacitko_credits_vybrane.jpg')
 quit_button = pg.image.load('obrazky/tlacitko_quit.jpg')
 quit_button_selected = pg.image.load('obrazky/tlacitko_quit_vybrane.jpg')
 endless_game_button = pg.image.load('obrazky/tlacitko_endless_game.jpg')
+endless_game_button_selected = pg.image.load('obrazky/tlacitko_endless_game_vybrane.jpg')
+career_button = pg.image.load('obrazky/career_button.jpg')
+career_button_selected = pg.image.load('obrazky/career_button_selected.jpg')
+designs_button = pg.image.load('obrazky/designs_button.jpg')
+designs_button_selected = pg.image.load('obrazky/designs_button_selected.jpg')
 
 player = pg.image.load('obrazky/hrac.png').convert_alpha()
 bullet = pg.image.load('obrazky/strela.png').convert_alpha()
@@ -118,7 +124,7 @@ class Enemy(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.image = enemy
         self.rect = self.image.get_rect()
-        self.rect.y = 200
+        self.rect.y = 0
         self.rect.x = random.randint(0, resolution_x - self.rect.width)
         
         enemy_group.add(self)
@@ -129,10 +135,8 @@ class Enemy(pg.sprite.Sprite):
         
         self.rect.y += self.velocity_y
         
-        if self.rect.y > resolution_y - self.rect.height:
-            self.velocity_y *= -1
-        if self.rect.y < 0:
-            self.velocity_y *= -1
+        if self.rect.y > resolution_y:
+            self.kill()
 ###########################################################################################
 #GAME_SPRITE_GROUPS
 player_group = pg.sprite.Group()
@@ -152,36 +156,54 @@ def game_menu():
     cursor = pg.mouse.get_pos()
 
     game.blit(menu_bkg,(0,0))
-    game.blit(play_button,(500,65))
-    game.blit(credits_button,(500,330))
-    game.blit(quit_button,(500,595))
+    game.blit(play_button,(400,100))
+    game.blit(credits_button,(400,350))
+    game.blit(quit_button,(400,600))
 
-    if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 65 and cursor[1] < 265:
-        game.blit(play_button_selected, (500, 65))
-        if pg.mouse.get_pressed()[0]:
-            game_mode = 'game_selection'
+    if cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 100 and cursor[1] < 250:
+        game.blit(play_button_selected, (400, 100))
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                game_mode = 'game_selection'
 
-    elif cursor[0] > 500 and cursor [0] < 1150 and cursor[1]  > 330 and cursor[1] < 550:
-        game.blit(credits_button_selected, (500, 330))
-        if pg.mouse.get_pressed()[0]:
-            game_mode = 'credits'
+    elif cursor[0] > 400 and cursor [0] < 1250 and cursor[1]  > 350 and cursor[1] < 500:
+        game.blit(credits_button_selected, (400, 350))
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                game_mode = 'credits'
 
-    elif cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 615 and cursor[1] < 815:
-        game.blit(quit_button_selected, (500, 595))       
-        if pg.mouse.get_pressed()[0]:
-            exit()
+    elif cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 600 and cursor[1] < 750:
+        game.blit(quit_button_selected, (400, 600))       
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                exit()
 
 def game_selection_menu():
     global game_mode
     cursor = pg.mouse.get_pos()
-    
-    game.fill((255,255,255))
+
     game.blit(menu_bkg,(0,0))
-    game.blit(endless_game_button,(500,300))
-    
-    if cursor[0] > 500 and cursor[0] < 1150 and cursor[1] > 300 and cursor[1] < 500:
-        if pg.mouse.get_pressed()[0]:
-            game_mode = 'endless_game'
+    game.blit(endless_game_button,(400,100))
+    game.blit(career_button,(400,350))
+    game.blit(designs_button,(400,600))
+
+    if cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 100 and cursor[1] < 250:
+        game.blit(endless_game_button_selected, (400, 100))
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                game_mode = 'endless_game'
+
+    elif cursor[0] > 400 and cursor [0] < 1250 and cursor[1]  > 350 and cursor[1] < 500:
+        game.blit(career_button_selected, (400, 350))
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                game_mode = 'boss_rush'
+
+    elif cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 600 and cursor[1] < 750:
+        game.blit(designs_button_selected, (400, 600))       
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                game_mod = 'designs'
 
 def zobrazeni_zivotu():
     if player_health == 3:
@@ -217,6 +239,17 @@ def score():
     text = font.render(s,1,(255,255,255))
     game.blit(text,(0,25))
 
+def endless_mode_accel():
+    global max_enemy_endless_game
+    global enemy_velocity_y
+    if current_score == 1000 or current_score == 1050 :
+        enemy_velocity_y += 0.25
+    
+    if current_score == 2500 or current_score == 2550:
+        max_enemy_endless_game += 1
+        enemy_velocity_y += 0.25
+
+###########################################################################################
 
 player = Player()
 
@@ -261,6 +294,7 @@ while game_mode == 'endless_game':
     bullet_group.draw(game)
     zobrazeni_zivotu()
     score()
+    endless_mode_accel()
     
     pg.display.update()
     
