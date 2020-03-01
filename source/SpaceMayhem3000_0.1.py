@@ -132,11 +132,12 @@ class Enemy(pg.sprite.Sprite):
         self.velocity_y = enemy_velocity_y
     
     def update(self):
-        
+        global current_score
         self.rect.y += self.velocity_y
         
         if self.rect.y > resolution_y:
             self.kill()
+            current_score -= 25
 ###########################################################################################
 #GAME_SPRITE_GROUPS
 player_group = pg.sprite.Group()
@@ -242,12 +243,29 @@ def score():
 def endless_mode_accel():
     global max_enemy_endless_game
     global enemy_velocity_y
-    if current_score == 1000 or current_score == 1050 :
-        enemy_velocity_y += 0.05
+    if current_score > 1000 and current_score < 2500:
+        enemy_velocity_y = 2
     
-    if current_score == 2500 or current_score == 2550:
-        max_enemy_endless_game += 1
-        enemy_velocity_y += 0.05
+    if current_score > 2500  and current_score < 3500:
+        max_enemy_endless_game = 4
+        enemy_velocity_y = 2.5
+    
+    if current_score > 3500 and current_score < 4000:
+        enemy_velocity_y = 3.25
+    
+    if current_score > 4000 and current_score < 11111112500:
+        max_enemy_endless_game = 5
+        enemy_velocity_y = 4
+
+def hack_check():
+    global current_score
+    global player_health
+    k = pg.key.get_pressed()
+    
+    if k[pg.K_o]:
+        current_score += 10000
+    if k[pg.K_p]:
+        player_health += 1
 
 ###########################################################################################
 
@@ -294,6 +312,7 @@ while game_mode == 'endless_game':
     bullet_group.draw(game)
     zobrazeni_zivotu()
     score()
+    hack_check()
     endless_mode_accel()
     
     pg.display.update()
