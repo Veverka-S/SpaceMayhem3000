@@ -243,11 +243,11 @@ def endless_mode_accel():
     global max_enemy_endless_game
     global enemy_velocity_y
     if current_score == 1000 or current_score == 1050 :
-        enemy_velocity_y += 0.25
+        enemy_velocity_y += 0.05
     
     if current_score == 2500 or current_score == 2550:
         max_enemy_endless_game += 1
-        enemy_velocity_y += 0.25
+        enemy_velocity_y += 0.05
 
 ###########################################################################################
 
