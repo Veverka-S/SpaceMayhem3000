@@ -2,6 +2,7 @@ import sys
 import random
 import pygame as pg
 
+pg.font.init()
 ###########################################################################################
 #GAME_SPEEDS_AND_POSITIONS
 resolution_x = 1650
@@ -125,8 +126,10 @@ class Enemy(pg.sprite.Sprite):
         self.image = enemy
         self.rect = self.image.get_rect()
         self.rect.y = 0
-        self.rect.x = random.randint(0, resolution_x - self.rect.width)
-        
+        self.rect.x = random.randint(100, resolution_x - self.rect.width)
+        while pg.sprite.spritecollide(self, enemy_group, False):
+            self.rect.x = random.randint(0, resolution_x - self.rect.width)
+            
         enemy_group.add(self)
         
         self.velocity_y = enemy_velocity_y
@@ -137,7 +140,8 @@ class Enemy(pg.sprite.Sprite):
         
         if self.rect.y > resolution_y:
             self.kill()
-            current_score -= 25
+            if current_score > 0:
+                current_score -= 75
 ###########################################################################################
 #GAME_SPRITE_GROUPS
 player_group = pg.sprite.Group()
@@ -207,55 +211,60 @@ def game_selection_menu():
                 game_mod = 'designs'
 
 def zobrazeni_zivotu():
-    if player_health == 3:
-        font = pg.font.Font(None,25)
+    if player_health > 3:
+        font = pg.font.Font('freesansbold.ttf',30)
         s = "Health: " + str(player_health)
         text = font.render(s, 1, (255,255,255))
-        game.blit(text,(0,0))
+        game.blit(text,(20,20))
+    if player_health == 3:
+        font = pg.font.Font('freesansbold.ttf',30)
+        s = "Health: " + str(player_health)
+        text = font.render(s, 1, (255,255,255))
+        game.blit(text,(20,20))
     elif player_health == 2:
-        font = pg.font.Font(None,25)
+        font = pg.font.Font('freesansbold.ttf',30)
         s = "Health: " + str(player_health)
         text = font.render(s, 1, (200,100,0))
-        game.blit(text,(0,0))
+        game.blit(text,(20,20))
     elif player_health == 1:
-        font = pg.font.Font(None,25)
+        font = pg.font.Font('freesansbold.ttf',30)
         s = "Health: " + str(player_health)
         text = font.render(s, 1, (255,0,0))
-        game.blit(text,(0,0))
+        game.blit(text,(20,20))
     
 def game_over_screen():
     while True:
         game_quit()
         game.blit(menu_bkg,(0,0))
         game.blit(game_over,(0,0))
-        font = pg.font.Font(None,50)
+        font = pg.font.Font('freesansbold.ttf',60)
         s = "Your score was: " + str(current_score)
         text = font.render(s,1,(255,255,255))
         game.blit(text,(500, 700))
         pg.display.update()
 
 def score():
-    font = pg.font.Font(None,25)
+    font = pg.font.Font('freesansbold.ttf',30)
     s = "Score: " + str(current_score)
     text = font.render(s,1,(255,255,255))
-    game.blit(text,(0,25))
+    game.blit(text,(20,65))
 
 def endless_mode_accel():
     global max_enemy_endless_game
     global enemy_velocity_y
     if current_score > 1000 and current_score < 2500:
-        enemy_velocity_y = 2
+        enemy_velocity_y = 4
     
     if current_score > 2500  and current_score < 3500:
-        max_enemy_endless_game = 4
-        enemy_velocity_y = 2.5
+        max_enemy_endless_game = 6
+        enemy_velocity_y = 3.75
     
     if current_score > 3500 and current_score < 4000:
-        enemy_velocity_y = 3.25
+        enemy_velocity_y = 4.25
     
     if current_score > 4000 and current_score < 11111112500:
-        max_enemy_endless_game = 5
-        enemy_velocity_y = 4
+        max_enemy_endless_game = 7
+        enemy_velocity_y = 5
 
 def hack_check():
     global current_score
@@ -268,14 +277,11 @@ def hack_check():
         player_health += 1
 
 ###########################################################################################
-
 player = Player()
-
 
 while game_mode == 'menu':
     game_quit()
     game_menu()
-
     pg.display.update()
 
 while game_mode == 'game_selection':
@@ -294,7 +300,8 @@ while game_mode == 'endless_game':
     
     if player_collided_with_enemy:
         player_health -= 1
-        current_score -= 50
+        if current_score > 0:
+            current_score -= 100
         if player_health == 0:
             game_over_screen()
         
@@ -312,7 +319,7 @@ while game_mode == 'endless_game':
     bullet_group.draw(game)
     zobrazeni_zivotu()
     score()
-    hack_check()
+    #hack_check()
     endless_mode_accel()
     
     pg.display.update()
