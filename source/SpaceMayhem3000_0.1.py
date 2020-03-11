@@ -27,7 +27,12 @@ current_score = 0
 button_width = 850
 button_height = 150
 
+max_enemy_lvl1 = 60
+ENEMY_LVL1 = 60
+
 game_mode = 'menu'
+
+SPAWN = True
 ###########################################################################################
 #GAME_SCREEN
 pg.init()
@@ -142,11 +147,28 @@ class Enemy(pg.sprite.Sprite):
             self.kill()
             if current_score > 0:
                 current_score -= 75
+
+class Enemy_BR(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = enemy
+        self.rect = self.image.get_rect()
+        self.rect.y = 100
+        self.rect.x = 75
+        while pg.sprite.spritecollide(self, enemy_group_br, False):
+            self.rect.x += 75
+            if self.rect.x > 1525:
+                self.rect.x = 75
+                self.rect.y += 100
+            
+        enemy_group_br.add(self)
+
 ###########################################################################################
 #GAME_SPRITE_GROUPS
 player_group = pg.sprite.Group()
 enemy_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
+enemy_group_br = pg.sprite.Group()
 ###########################################################################################
 #GAME_MENUS_AND_BUTTONS
 
@@ -323,10 +345,45 @@ while game_mode == 'endless_game':
     endless_mode_accel()
     
     pg.display.update()
+
+while game_mode == 'boss_rush':
+    game_quit()
+
+    while SPAWN == True:
+        if len(enemy_group_br.sprites()) < max_enemy_lvl1:
+            Enemy_BR()
+            if len(enemy_group_br.sprites()) == max_enemy_lvl1:
+                SPAWN = False
+    player_collided_with_enemy = pg.sprite.groupcollide(player_group, enemy_group_br, False, True)
+    enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)
     
+    if player_collided_with_enemy:
+        player_health -= 1
+        if current_score > 0:
+            urrent_score -= 100
+    if player_health == 0:
+        game_over_screen()
+        
+    if enemy_hit:
+        current_score += 100
+        ENEMY_LVL1 -= 1
+        
+    if ENEMY_LVL1 == 0:
+        print("you win")
+
+    game.blit(game_bkg,(0,0))
     
+    player_group.update()
+    enemy_group_br.update()
+    bullet_group.update()
     
+    player_group.draw(game)
+    enemy_group_br.draw(game)
+    bullet_group.draw(game)
+    zobrazeni_zivotu()
+    score()
     
+    pg.display.update()
 
 
 
