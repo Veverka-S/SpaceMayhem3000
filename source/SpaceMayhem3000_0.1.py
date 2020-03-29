@@ -27,12 +27,14 @@ current_score = 0
 button_width = 850
 button_height = 150
 
-max_enemy_lvl1 = 60
-ENEMY_LVL1 = 60
+max_enemy_lvl1 = 2
+ENEMY_LVL1 = 2
 
 game_mode = 'menu'
 
-SPAWN = True
+SPAWN1 = True
+SPAWN2 = False
+
 ###########################################################################################
 #GAME_SCREEN
 pg.init()
@@ -54,13 +56,12 @@ endless_game_button = pg.image.load('obrazky/tlacitko_endless_game.jpg')
 endless_game_button_selected = pg.image.load('obrazky/tlacitko_endless_game_vybrane.jpg')
 career_button = pg.image.load('obrazky/career_button.jpg')
 career_button_selected = pg.image.load('obrazky/career_button_selected.jpg')
-designs_button = pg.image.load('obrazky/designs_button.jpg')
-designs_button_selected = pg.image.load('obrazky/designs_button_selected.jpg')
 
 player = pg.image.load('obrazky/hrac.png').convert_alpha()
 bullet = pg.image.load('obrazky/strela.png').convert_alpha()
 enemy = pg.image.load('obrazky/nepritel.png').convert_alpha()
 game_over = pg.image.load('obrazky/konec_hry.png').convert_alpha()
+enemy_2 = pg.image.load('obrazky/konec_hry.png').convert_alpha()
 
 ###########################################################################################
 #GAME_CLASSES
@@ -163,12 +164,28 @@ class Enemy_BR(pg.sprite.Sprite):
             
         enemy_group_br.add(self)
 
+class Enemy_BR2(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = enemy_2
+        self.rect = self.image.get_rect()
+        self.rect.y = 100
+        self.rect.x = 75
+        while pg.sprite.spritecollide(self, enemy_group_br2, False):
+            self.rect.x += 75
+            if self.rect.x > 1525:
+                self.rect.x = 75
+                self.rect.y += 100
+            
+        enemy_group_br2.add(self)
+
 ###########################################################################################
 #GAME_SPRITE_GROUPS
 player_group = pg.sprite.Group()
 enemy_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 enemy_group_br = pg.sprite.Group()
+enemy_group_br2 = pg.sprite.Group()
 ###########################################################################################
 #GAME_MENUS_AND_BUTTONS
 
@@ -210,27 +227,21 @@ def game_selection_menu():
     cursor = pg.mouse.get_pos()
 
     game.blit(menu_bkg,(0,0))
-    game.blit(endless_game_button,(400,100))
-    game.blit(career_button,(400,350))
-    game.blit(designs_button,(400,600))
+    game.blit(endless_game_button,(400,250))
+    game.blit(career_button,(400,500))
 
-    if cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 100 and cursor[1] < 250:
-        game.blit(endless_game_button_selected, (400, 100))
+    if cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 250 and cursor[1] < 400:
+        game.blit(endless_game_button_selected, (400, 250))
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONDOWN:
                 game_mode = 'endless_game'
 
-    elif cursor[0] > 400 and cursor [0] < 1250 and cursor[1]  > 350 and cursor[1] < 500:
-        game.blit(career_button_selected, (400, 350))
+    elif cursor[0] > 400 and cursor [0] < 1250 and cursor[1]  > 500 and cursor[1] < 650:
+        game.blit(career_button_selected, (400, 500))
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONDOWN:
                 game_mode = 'boss_rush'
 
-    elif cursor[0] > 400 and cursor[0] < 1250 and cursor[1] > 600 and cursor[1] < 750:
-        game.blit(designs_button_selected, (400, 600))       
-        for event in pg.event.get():
-            if event.type == pg.MOUSEBUTTONDOWN:
-                game_mod = 'designs'
 
 def zobrazeni_zivotu():
     if player_health > 3:
@@ -347,30 +358,42 @@ while game_mode == 'endless_game':
     pg.display.update()
 
 while game_mode == 'boss_rush':
-    game_quit()
 
-    while SPAWN == True:
+    game_quit()
+    while SPAWN1 == True:
         if len(enemy_group_br.sprites()) < max_enemy_lvl1:
             Enemy_BR()
             if len(enemy_group_br.sprites()) == max_enemy_lvl1:
-                SPAWN = False
+                SPAWN1 = False
+       
     player_collided_with_enemy = pg.sprite.groupcollide(player_group, enemy_group_br, False, True)
-    enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)
-    
+    enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)        
+
     if player_collided_with_enemy:
         player_health -= 1
         if current_score > 0:
-            urrent_score -= 100
+            current_score -= 100
+            
     if player_health == 0:
         game_over_screen()
         
     if enemy_hit:
         current_score += 100
         ENEMY_LVL1 -= 1
-        
+    
+    if ENEMY_LVL1 == 1:
+        print('je tam jeden')
+      
+     #####WIP SPAVNOVÁNÍ POKROČILÝCH MONSTER 
     if ENEMY_LVL1 == 0:
-        print("you win")
-
+        print('nikdo lol')
+        max_enemy_lvl1 = 80
+        ENEMY_LVL1 = 80
+        SPAWN1 = True
+    
+        
+        
+        
     game.blit(game_bkg,(0,0))
     
     player_group.update()
@@ -386,5 +409,3 @@ while game_mode == 'boss_rush':
     pg.display.update()
 
 
-
-        
