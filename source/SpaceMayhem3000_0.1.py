@@ -16,19 +16,24 @@ enemy_velocity_y = 1
 bullet_velocity = 10
 bullet_count = 0
 
+spawn_boss = False
+
 max_enemy_endless_game = 3
 
 max_enemy = 5
 
 player_health = 3
 
+boss_HP = 100
+
 current_score = 0
 
 button_width = 850
 button_height = 150
 
-max_enemy_lvl1 = 2
-ENEMY_LVL1 = 2
+max_enemy_lvl1 = 25
+enemy_v1 = 25
+enemy_v2 = 80
 
 game_mode = 'menu'
 
@@ -56,6 +61,9 @@ endless_game_button = pg.image.load('obrazky/tlacitko_endless_game.jpg')
 endless_game_button_selected = pg.image.load('obrazky/tlacitko_endless_game_vybrane.jpg')
 career_button = pg.image.load('obrazky/career_button.jpg')
 career_button_selected = pg.image.load('obrazky/career_button_selected.jpg')
+exitsmall_button = pg.image.load('obrazky/EXIT_BUTTONSM.jpg')
+exitsmall_button_selected = pg.image.load('obrazky/EXIT_BUTTONSMALL.jpg')
+boss = pg.image.load('obrazky/boss.jpg')
 
 player = pg.image.load('obrazky/hrac.png').convert_alpha()
 bullet = pg.image.load('obrazky/strela.png').convert_alpha()
@@ -108,7 +116,18 @@ class Player(pg.sprite.Sprite):
             self.rect.top = resolution_y - 50
         if self.rect.bottom < 0 + 50:
             self.rect.bottom = 0 + 50
-
+class Boss(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = boss
+        self.rect = self.image.get_rect()
+        self.rect.x = resolution_x / 2 - 225
+        self.rect.y = resolution_y / 2 - 225
+        
+        boss_group.add(self)
+        
+        player_group.add(self)
+    
 class Bullet(pg.sprite.Sprite):
     def __init__(self, player):
         pg.sprite.Sprite.__init__(self)
@@ -164,20 +183,6 @@ class Enemy_BR(pg.sprite.Sprite):
             
         enemy_group_br.add(self)
 
-class Enemy_BR2(pg.sprite.Sprite):
-    def __init__(self):
-        pg.sprite.Sprite.__init__(self)
-        self.image = enemy_2
-        self.rect = self.image.get_rect()
-        self.rect.y = 100
-        self.rect.x = 75
-        while pg.sprite.spritecollide(self, enemy_group_br2, False):
-            self.rect.x += 75
-            if self.rect.x > 1525:
-                self.rect.x = 75
-                self.rect.y += 100
-            
-        enemy_group_br2.add(self)
 
 ###########################################################################################
 #GAME_SPRITE_GROUPS
@@ -186,6 +191,7 @@ enemy_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 enemy_group_br = pg.sprite.Group()
 enemy_group_br2 = pg.sprite.Group()
+boss_group = pg.sprite.Group()
 ###########################################################################################
 #GAME_MENUS_AND_BUTTONS
 
@@ -267,13 +273,22 @@ def zobrazeni_zivotu():
     
 def game_over_screen():
     while True:
+        m = pg.mouse.get_pos()
         game_quit()
         game.blit(menu_bkg,(0,0))
         game.blit(game_over,(0,0))
+        game.blit(exitsmall_button,(1450, 50))
         font = pg.font.Font('freesansbold.ttf',60)
         s = "Your score was: " + str(current_score)
         text = font.render(s,1,(255,255,255))
         game.blit(text,(500, 700))
+        
+        if m[0] > 1450 and m[0] < 1550 and m[1] > 50 and m[1] < 100:
+            game.blit(exitsmall_button_selected, (1450,50))
+            for event in pg.event.get():
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    exit()
+        
         pg.display.update()
 
 def score():
@@ -371,6 +386,8 @@ while game_mode == 'boss_rush':
 
     if player_collided_with_enemy:
         player_health -= 1
+        enemy_v1 -= 1
+        enemy_v2 -= 1
         if current_score > 0:
             current_score -= 100
             
@@ -379,21 +396,23 @@ while game_mode == 'boss_rush':
         
     if enemy_hit:
         current_score += 100
-        ENEMY_LVL1 -= 1
+        enemy_v1 -= 1
+        enemy_v2 -= 1
+    print(enemy_v1)
+    print(enemy_v2)
     
-    if ENEMY_LVL1 == 1:
-        print('je tam jeden')
-      
-     #####WIP SPAVNOVÁNÍ POKROČILÝCH MONSTER 
-    if ENEMY_LVL1 == 0:
-        print('nikdo lol')
-        max_enemy_lvl1 = 80
-        ENEMY_LVL1 = 80
+    if enemy_v1 == 0:
+        max_enemy_lvl1 = 5
+        enemy_v2 = 5
+        enemy_v1 = 420
         SPAWN1 = True
     
+    if enemy_v2 == 0:
+        ## spawnování bosse
         
         
-        
+    
+ 
     game.blit(game_bkg,(0,0))
     
     player_group.update()
@@ -408,4 +427,5 @@ while game_mode == 'boss_rush':
     
     pg.display.update()
 
+    
 
