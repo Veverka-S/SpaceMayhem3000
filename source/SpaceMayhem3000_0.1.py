@@ -16,29 +16,26 @@ enemy_velocity_y = 1
 bullet_velocity = 10
 bullet_count = 0
 
-spawn_boss = False
-
 max_enemy_endless_game = 3
-
-max_enemy = 5
 
 player_health = 3
 
-boss_HP = 100
-
 current_score = 0
 
-button_width = 850
-button_height = 150
-
-max_enemy_lvl1 = 25
-enemy_v1 = 25
-enemy_v2 = 80
+max_enemy= 20
+enemy_count = max_enemy
 
 game_mode = 'menu'
 
-SPAWN1 = True
-SPAWN2 = False
+enemy_spawn = True
+
+spawn1 = True
+spawn2 = True
+spawn3 = True
+spawn4 = True
+spawn5 = True
+spawn_boss = True
+
 
 ###########################################################################################
 #GAME_SCREEN
@@ -64,6 +61,7 @@ career_button_selected = pg.image.load('obrazky/career_button_selected.jpg')
 exitsmall_button = pg.image.load('obrazky/EXIT_BUTTONSM.jpg')
 exitsmall_button_selected = pg.image.load('obrazky/EXIT_BUTTONSMALL.jpg')
 boss = pg.image.load('obrazky/boss.jpg')
+credits_bkg = pg.image.load('obrazky/credits.jpg')
 
 player = pg.image.load('obrazky/hrac.png').convert_alpha()
 bullet = pg.image.load('obrazky/strela.png').convert_alpha()
@@ -200,7 +198,8 @@ def game_quit():
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
-
+    
+    
 def game_menu():
     global game_mode
     cursor = pg.mouse.get_pos()
@@ -337,7 +336,11 @@ while game_mode == 'game_selection':
     game_selection_menu()
 
     pg.display.update()
-
+while game_mode == 'credits':
+    game_quit()
+    game.blit(credits_bkg,(0,0))
+    pg.display.update()
+    
 while game_mode == 'endless_game':
     game_quit()
     if len(enemy_group.sprites()) < max_enemy_endless_game:
@@ -375,19 +378,18 @@ while game_mode == 'endless_game':
 while game_mode == 'boss_rush':
 
     game_quit()
-    while SPAWN1 == True:
-        if len(enemy_group_br.sprites()) < max_enemy_lvl1:
+    while enemy_spawn == True:
+        if len(enemy_group_br.sprites()) < max_enemy:
             Enemy_BR()
-            if len(enemy_group_br.sprites()) == max_enemy_lvl1:
-                SPAWN1 = False
+            if len(enemy_group_br.sprites()) == max_enemy:
+                enemy_spawn = False
        
     player_collided_with_enemy = pg.sprite.groupcollide(player_group, enemy_group_br, False, True)
     enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)        
 
     if player_collided_with_enemy:
         player_health -= 1
-        enemy_v1 -= 1
-        enemy_v2 -= 1
+        enemy_count -= 1
         if current_score > 0:
             current_score -= 100
             
@@ -396,19 +398,47 @@ while game_mode == 'boss_rush':
         
     if enemy_hit:
         current_score += 100
-        enemy_v1 -= 1
-        enemy_v2 -= 1
-    print(enemy_v1)
-    print(enemy_v2)
+        enemy_count -= 1
+        
+    print(enemy_count)
     
-    if enemy_v1 == 0:
-        max_enemy_lvl1 = 5
-        enemy_v2 = 5
-        enemy_v1 = 420
-        SPAWN1 = True
+    if enemy_count == 0 and spawn1 == True:
+        max_enemy = 2
+        enemy_count = max_enemy 
+        enemy_spawn = True
+        spawn1 = False
+
     
-    if enemy_v2 == 0:
-        ## spawnování bosse
+    if enemy_count == 0 and spawn2 == True:
+        max_enemy = 3
+        enemy_count = max_enemy 
+        enemy_spawn = True
+        spawn2 = False
+
+
+    if enemy_count == 0 and spawn3 == True:
+        max_enemy = 4
+        enemy_count = max_enemy
+        enemy_spawn = True
+        spawn3 = False
+
+        
+    if enemy_count == 0 and spawn4 == True:
+        max_enemy = 5
+        enemy_count = max_enemy
+        enemy_spawn = True
+        spawn4 = False
+
+
+    if enemy_count == 0 and spawn5 == True:
+        max_enemy = 6
+        enemy_count = max_enemy
+        enemy_spawn = True
+        spawn5 = False
+    
+    #if enemy_count == 0 and spawn_boss == True:
+       
+
         
         
     
