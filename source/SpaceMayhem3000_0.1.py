@@ -436,12 +436,9 @@ while game_mode == 'boss_rush':
         enemy_spawn = True
         spawn5 = False
     
-    #if enemy_count == 0 and spawn_boss == True:
-       
-
-        
-        
-    
+    if enemy_count == 0 and spawn_boss == True:
+        Boss()
+        spawn_boss = False
  
     game.blit(game_bkg,(0,0))
     
