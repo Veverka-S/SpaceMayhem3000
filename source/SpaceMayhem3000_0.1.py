@@ -16,11 +16,14 @@ enemy_velocity_y = 1
 bullet_velocity = 10
 bullet_count = 0
 
+boss_health = 100
+
 max_enemy_endless_game = 3
 
 player_health = 3
 enemy_x = 75
-boss_health = 99999999
+Boss = True
+
 
 current_score = 0
 
@@ -64,6 +67,7 @@ exitsmall_button = pg.image.load('obrazky/EXIT_BUTTONSM.jpg')
 exitsmall_button_selected = pg.image.load('obrazky/EXIT_BUTTONSMALL.jpg')
 boss = pg.image.load('obrazky/boss.jpg')
 credits_bkg = pg.image.load('obrazky/credits.jpg')
+endgame_bkg = pg.image.load('obrazky/endgame.jpg')
 
 player = pg.image.load('obrazky/hrac.png').convert_alpha()
 bullet = pg.image.load('obrazky/strela.png').convert_alpha()
@@ -200,9 +204,21 @@ def game_quit():
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
+def endgame():
+    game_quit()
+    game.blit(endgame_bkg, (0,0))
+    pg.display.update()
 
-def game_end():
-    game.blit(
+def exitbutton():
+    m = pg.mouse.get_pos()
+    game.blit(exitsmall_button,(1450, 50))
+    if m[0] > 1450 and m[0] < 1550 and m[1] > 50 and m[1] < 100:
+            game.blit(exitsmall_button_selected, (1450,50))
+            for event in pg.event.get():
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    exit()
+        
+    pg.display.update()
     
 def game_menu():
     global game_mode
@@ -300,6 +316,12 @@ def score():
     text = font.render(s,1,(255,255,255))
     game.blit(text,(20,65))
 
+def boss_healthshow():
+    font = pg.font.Font('freesansbold.ttf',30)
+    s = "Zbývající životy bosse: " + str(boss_health)
+    text = font.render(s,1,(255,255,255))
+    game.blit(text,(20,105))
+
 def endless_mode_accel():
     global max_enemy_endless_game
     global enemy_velocity_y
@@ -343,6 +365,7 @@ while game_mode == 'game_selection':
 while game_mode == 'credits':
     game_quit()
     game.blit(credits_bkg,(0,0))
+    exitbutton()
     pg.display.update()
     
 while game_mode == 'endless_game':
@@ -380,7 +403,6 @@ while game_mode == 'endless_game':
     pg.display.update()
 
 while game_mode == 'boss_rush':
-
     game_quit()
     while enemy_spawn == True:
         if len(enemy_group_br.sprites()) < max_enemy:
@@ -390,6 +412,10 @@ while game_mode == 'boss_rush':
                 
     player_collided_with_enemy = pg.sprite.groupcollide(player_group, enemy_group_br, False, True)
     enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)
+    if boss_health > 0:
+        boss_hit = pg.sprite.groupcollide(bullet_group, boss_group, True, False)
+    else:
+        boss_hit = pg.sprite.groupcollide(bullet_group, boss_group, True, True)
         
     if player_collided_with_enemy:
         player_health -= 1
@@ -403,61 +429,52 @@ while game_mode == 'boss_rush':
     if enemy_hit:
         current_score += 100
         enemy_count -= 1
-        boss_health -= 5
-    
+        
     if enemy_count == 0 and spawn1 == True:
-        max_enemy = 2
+        max_enemy = 30
         enemy_count = max_enemy 
         enemy_spawn = True
         spawn1 = False
 
     
     if enemy_count == 0 and spawn2 == True:
-        max_enemy = 3
+        max_enemy = 45
         enemy_count = max_enemy 
         enemy_spawn = True
         spawn2 = False
 
 
     if enemy_count == 0 and spawn3 == True:
-        max_enemy = 4
+        max_enemy = 55
         enemy_count = max_enemy
         enemy_spawn = True
         spawn3 = False
 
         
     if enemy_count == 0 and spawn4 == True:
-        max_enemy = 5
+        max_enemy = 60
         enemy_count = max_enemy
         enemy_spawn = True
         spawn4 = False
 
 
     if enemy_count == 0 and spawn5 == True:
-        max_enemy = 6
+        max_enemy = 65
         enemy_count = max_enemy
         enemy_spawn = True
         spawn5 = False
     
     if enemy_count == 0 and spawn_boss == True:
-        print(boss_health)
-        max_enemy = 1
-        enemy_x = 825
-        enemy_count = max_enemy
-        enemy_spawn = True
+        Boss()
         spawn_boss = False
-    
-    if enemy_count == 0:
-        game_end()
-    
-            
-
-       
-
         
-        
+    if boss_hit:
+        boss_health -= 1
     
- 
+    while boss_health == 0:
+        endgame()
+        exitbutton()
+        
     game.blit(game_bkg,(0,0))
     
     player_group.update()
