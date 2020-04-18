@@ -19,6 +19,8 @@ bullet_count = 0
 max_enemy_endless_game = 3
 
 player_health = 3
+enemy_x = 75
+boss_health = 99999999
 
 current_score = 0
 
@@ -172,7 +174,7 @@ class Enemy_BR(pg.sprite.Sprite):
         self.image = enemy
         self.rect = self.image.get_rect()
         self.rect.y = 100
-        self.rect.x = 75
+        self.rect.x = enemy_x
         while pg.sprite.spritecollide(self, enemy_group_br, False):
             self.rect.x += 75
             if self.rect.x > 1525:
@@ -198,7 +200,9 @@ def game_quit():
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
-    
+
+def game_end():
+    game.blit(
     
 def game_menu():
     global game_mode
@@ -383,10 +387,10 @@ while game_mode == 'boss_rush':
             Enemy_BR()
             if len(enemy_group_br.sprites()) == max_enemy:
                 enemy_spawn = False
-       
+                
     player_collided_with_enemy = pg.sprite.groupcollide(player_group, enemy_group_br, False, True)
-    enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)        
-
+    enemy_hit = pg.sprite.groupcollide(bullet_group, enemy_group_br, True, True)
+        
     if player_collided_with_enemy:
         player_health -= 1
         enemy_count -= 1
@@ -399,8 +403,7 @@ while game_mode == 'boss_rush':
     if enemy_hit:
         current_score += 100
         enemy_count -= 1
-        
-    print(enemy_count)
+        boss_health -= 5
     
     if enemy_count == 0 and spawn1 == True:
         max_enemy = 2
@@ -436,7 +439,19 @@ while game_mode == 'boss_rush':
         enemy_spawn = True
         spawn5 = False
     
-    #if enemy_count == 0 and spawn_boss == True:
+    if enemy_count == 0 and spawn_boss == True:
+        print(boss_health)
+        max_enemy = 1
+        enemy_x = 825
+        enemy_count = max_enemy
+        enemy_spawn = True
+        spawn_boss = False
+    
+    if enemy_count == 0:
+        game_end()
+    
+            
+
        
 
         
